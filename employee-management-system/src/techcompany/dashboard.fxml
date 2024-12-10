@@ -1,19 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.String?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.shape.Line?>
-<?import javafx.scene.text.Font?>
+<?import de.jensd.fx.glyphs.fontawesome.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.*?>
+<?import javafx.scene.text.*?>
 
-<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="techcompany.Dashboardcontroller">
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="techcompany.Dashboardcontroller">
    <children>
       <AnchorPane fx:id="main_form" prefHeight="200.0" prefWidth="200.0">
          <children>
@@ -24,7 +18,7 @@
                         <AnchorPane layoutX="190.0" layoutY="-55.0" prefHeight="35.0" prefWidth="1100.0" stylesheets="@dashboardDesign.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
                               <FontAwesomeIcon glyphName="BUILDING" layoutX="14.0" layoutY="31.0" size="2em" />
-                              <Label layoutX="42.0" layoutY="11.0" text="Employee Management System">
+                              <Label layoutX="42.0" layoutY="11.0" text="Parking Manager System">
                                  <font>
                                     <Font name="Calibri Bold" size="18.0" />
                                  </font>
@@ -56,9 +50,9 @@
                                  </font>
                               </Label>
                               <Line endX="70.0" layoutX="115.0" layoutY="167.0" startX="-100.0" stroke="WHITE" />
-                              <Button fx:id="home_btn" layoutX="10.0" layoutY="189.0" mnemonicParsing="false" onAction="#switchForm" prefHeight="35.0" prefWidth="180.0" stylesheets="@dashboardDesign.css" text=" Home">
+                              <Button fx:id="home_btn" layoutX="10.0" layoutY="189.0" mnemonicParsing="false" onAction="#switchForm" prefHeight="35.0" prefWidth="180.0" stylesheets="@dashboardDesign.css" text="Tạo mới">
                                  <graphic>
-                                    <FontAwesomeIcon glyphName="HOME" size="1.5em" text="" />
+                                    <FontAwesomeIcon glyphName="HOME" size="1.5em" />
                                  </graphic>
                                  <styleClass>
                                     <String fx:value="nav-btn" />
@@ -114,66 +108,58 @@
                <center>
                   <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                      <children>
-                        <AnchorPane fx:id="home_form" layoutX="5.0" prefHeight="555.0" prefWidth="900.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="0.0">
+                        <AnchorPane fx:id="home_form" layoutX="24.0" layoutY="10.0" prefHeight="500.0" prefWidth="846.0" stylesheets="@dashboardDesign.css">
+                           <styleClass>
+                              <String fx:value="white-bg" />
+                              <String fx:value="shadow" />
+                           </styleClass>
                            <children>
-                              <AnchorPane layoutX="8.0" layoutY="6.0" prefHeight="559.0" prefWidth="895.0" stylesheets="@dashboardDesign.css" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="1.0">
-                                 <styleClass>
-                                    <String fx:value="white-bg" />
-                                    <String fx:value="shadow" />
-                                 </styleClass>
+                              <Label layoutX="20.0" layoutY="20.0" style="-fx-font-size: 20px;" text="Nhập thông tin thẻ:" />
+                              <GridPane hgap="20.0" layoutX="50.0" layoutY="70.0" vgap="15.0">
                                  <children>
-                                    <AnchorPane layoutX="1.0" layoutY="158.0" prefHeight="391.0" prefWidth="884.0" stylesheets="@dashboardDesign.css">
-                                       <children>
-                                          <TableView fx:id="addEmployee_tableView1" layoutX="7.0" layoutY="55.0" prefHeight="330.0" prefWidth="870.0">
-                                             <columns>
-                                                <TableColumn fx:id="addEmployee_col_employeeID1" prefWidth="95.0" text="Employee ID" />
-                                                <TableColumn fx:id="addEmployee_col_name1" prefWidth="101.0" text="Name" />
-                                                <TableColumn fx:id="addEmployee_col_gender1" prefWidth="75.0" text="Gender" />
-                                                <TableColumn fx:id="addEmployee_col_depart1" prefWidth="134.0" text="Department" />
-                                                <TableColumn fx:id="addEmployee_col_desig1" prefWidth="152.0" text="Designation" />
-                                                <TableColumn fx:id="addEmployee_col_salary1" prefWidth="107.0" text="Salary" />
-                                                <TableColumn fx:id="addEmployee_col_phoneNum1" prefWidth="114.0" text="Phone Number" />
-                                                <TableColumn fx:id="addEmployee_col_epfNo1" prefWidth="91.0" text="EPF NO:" />
-                                             </columns>
-                                          </TableView>
-                                          <TextField fx:id="addEmployee_search1" layoutX="320.0" layoutY="14.0" onKeyTyped="#addEmployeeSearchsecond" prefHeight="30.0" prefWidth="245.0" promptText="Search" stylesheets="@dashboardDesign.css" />
-                                          <FontAwesomeIcon glyphName="SEARCH" layoutX="547.0" layoutY="33.0" />
-                                       </children>
-                                       <styleClass>
-                                          <String fx:value="white-bg" />
-                                          <String fx:value="shadow" />
-                                       </styleClass>
-                                    </AnchorPane>
+                                    <Label text="Tên chủ xe:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                    <TextField prefWidth="300.0" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                    <Label text="Mẫu xe:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                    <TextField prefWidth="300.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                                    <Label text="Màu xe:" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                    <TextField prefWidth="300.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                                    <Label text="Biển số xe:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                                    <TextField prefWidth="300.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+                                    <Label text="Mã Pin:" GridPane.columnIndex="0" GridPane.rowIndex="4" />
+                                    <PasswordField prefWidth="300.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                                  </children>
-                              </AnchorPane>
-                              <AnchorPane layoutX="5.0" layoutY="1.0" prefHeight="157.0" prefWidth="894.0" stylesheets="@dashboardDesign.css" AnchorPane.bottomAnchor="407.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="11.0" AnchorPane.topAnchor="1.0">
-                                 <styleClass>
-                                    <String fx:value="white-bg" />
-                                    <String fx:value="shadow" />
-                                 </styleClass>
+                                 <columnConstraints>
+                                    <ColumnConstraints />
+                                    <ColumnConstraints />
+                                 </columnConstraints>
+                                 <rowConstraints>
+                                    <RowConstraints />
+                                    <RowConstraints />
+                                    <RowConstraints />
+                                    <RowConstraints />
+                                    <RowConstraints />
+                                 </rowConstraints>
+                              </GridPane>
+
+                              <!-- Image Upload and Save Button -->
+                              <AnchorPane prefHeight="150.0" prefWidth="150.0" xmlns:fx="http://javafx.com/fxml" />
+                              <Button layoutX="363.0" layoutY="348.0" prefWidth="120.0" text="Lưu" />
+                              <!-- Background Rectangle -->
+                              <Rectangle arcHeight="20.0" arcWidth="20.0" fill="WHITE" height="100.0" layoutX="609.0" layoutY="93.0" width="100.0" />
+                              <!-- Outer Frame with Rounded Corners -->
+                              <StackPane layoutX="602.0" layoutY="90.0" prefHeight="150.0" prefWidth="170.0" style="-fx-border-color: #6B6B6B; -fx-border-radius: 20; -fx-border-width: 2;">
                                  <children>
-                                    <AnchorPane layoutX="14.0" layoutY="9.0" prefHeight="129.0" prefWidth="868.0" stylesheets="@dashboardDesign.css" AnchorPane.bottomAnchor="9.0" AnchorPane.leftAnchor="9.0" AnchorPane.topAnchor="9.0">
-                                       <styleClass>
-                                          <String fx:value="nav-form" />
-                                          <String fx:value="card" />
-                                       </styleClass>
-                                       <children>
-                                          <FontAwesomeIcon fill="WHITE" glyphName="USERS" layoutX="42.0" layoutY="85.0" size="5em" />
-                                          <Label alignment="CENTER" layoutX="654.0" layoutY="75.0" text="Total Employees" textFill="WHITE">
-                                             <font>
-                                                <Font name="Impact" size="30.0" />
-                                             </font>
-                                          </Label>
-                                          <Label fx:id="home_totalEmployees" alignment="CENTER_RIGHT" layoutX="781.0" layoutY="19.0" prefHeight="39.0" prefWidth="73.0" text="0" textFill="WHITE">
-                                             <font>
-                                                <Font name="Impact" size="31.0" />
-                                             </font>
-                                          </Label>
-                                       </children>
-                                    </AnchorPane>
+
+                                    <!-- Placeholder Text -->
+                                    <Label style="-fx-font-size: 24px; -fx-font-family: 'Courier New';" text="Ảnh" />
                                  </children>
-                              </AnchorPane>
-                           </children></AnchorPane>
+                              </StackPane>
+                           </children>
+                        </AnchorPane>
                         <AnchorPane fx:id="addEmployee_form" layoutX="1.0" layoutY="-1.0" prefHeight="555.0" prefWidth="900.0" visible="false">
                            <children>
                               <AnchorPane layoutX="8.0" layoutY="3.0" prefHeight="559.0" prefWidth="895.0" stylesheets="@dashboardDesign.css" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="7.0" AnchorPane.topAnchor="3.0">
