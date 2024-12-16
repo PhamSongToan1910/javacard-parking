@@ -19,9 +19,6 @@ import javafx.stage.StageStyle;
  */
 public class TechCompany extends Application {
 
-
-
-    
     private double x = 0;
     private double y = 0;
     

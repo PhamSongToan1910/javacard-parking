@@ -1,0 +1,15 @@
+<component name="libraryTable">
+  <library name="jars">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/employee-management-system/jars/EmployeeManagementSystem-main.zip!/" />
+      <root url="jar://$PROJECT_DIR$/employee-management-system/jars/mysql-connector-java-8.0.28.jar!/" />
+      <root url="jar://$PROJECT_DIR$/employee-management-system/jars/jar_files.zip!/" />
+      <root url="jar://$PROJECT_DIR$/employee-management-system/jars/ojdbc8-19.3.0.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/employee-management-system/jars/fontawesomefx-8.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/employee-management-system/jars/jar_files_3.zip!/" />
+      <root url="jar://$PROJECT_DIR$/employee-management-system/jars/jar_files_2.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
