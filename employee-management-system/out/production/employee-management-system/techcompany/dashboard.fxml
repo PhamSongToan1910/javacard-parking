@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.jensd.fx.glyphs.fontawesome.*?>
-<?import java.lang.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.chart.*?>
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
+<?import de.jensd.fx.glyphs.fontawesome.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 
-<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="techcompany.Dashboardcontroller">
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="techcompany.Dashboardcontroller">
    <children>
       <AnchorPane fx:id="main_form" prefHeight="200.0" prefWidth="200.0">
          <children>
@@ -77,6 +81,20 @@
                                     <String fx:value="shadow" />
                                  </styleClass>
                               </Button>
+                              <Button fx:id="logout" layoutY="516.0" mnemonicParsing="false" onAction="#logout" stylesheets="@dashboardDesign.css" text="Log Out" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0">
+                                 <graphic>
+                                    <FontAwesomeIcon glyphName="SIGN_OUT" onDragDetected="#logout" size="1.5em" />
+                                 </graphic>
+                                 <styleClass>
+                                    <String fx:value="nav-btn" />
+                                    <String fx:value="shadow" />
+                                 </styleClass>
+                              </Button>
+                              <Label fx:id="username" alignment="CENTER" layoutX="40.0" layoutY="136.0" onDragDetected="#displayUsername" prefWidth="120.0" text="admin" textAlignment="CENTER" textFill="WHITE">
+                                 <font>
+                                    <Font name="Impact" size="20.0" />
+                                 </font>
+                              </Label>
                               <Button fx:id="addDepartment_btn" layoutX="10.0" layoutY="344.0" mnemonicParsing="false" onAction="#switchForm" prefHeight="35.0" prefWidth="180.0" stylesheets="@dashboardDesign.css" text=" Manage Departments">
                                  <graphic>
                                     <FontAwesomeIcon glyphName="BRIEFCASE" size="1.5em" text="" />
@@ -101,6 +119,30 @@
                                     <String fx:value="white-bg" />
                                     <String fx:value="shadow" />
                                  </styleClass>
+                                 <children>
+                                    <AnchorPane layoutX="1.0" layoutY="158.0" prefHeight="391.0" prefWidth="884.0" stylesheets="@dashboardDesign.css">
+                                       <children>
+                                          <TableView fx:id="addEmployee_tableView1" layoutX="7.0" layoutY="55.0" prefHeight="330.0" prefWidth="870.0">
+                                             <columns>
+                                                <TableColumn fx:id="addEmployee_col_employeeID1" prefWidth="95.0" text="Employee ID" />
+                                                <TableColumn fx:id="addEmployee_col_name1" prefWidth="101.0" text="Name" />
+                                                <TableColumn fx:id="addEmployee_col_gender1" prefWidth="75.0" text="Gender" />
+                                                <TableColumn fx:id="addEmployee_col_depart1" prefWidth="134.0" text="Department" />
+                                                <TableColumn fx:id="addEmployee_col_desig1" prefWidth="152.0" text="Designation" />
+                                                <TableColumn fx:id="addEmployee_col_salary1" prefWidth="107.0" text="Salary" />
+                                                <TableColumn fx:id="addEmployee_col_phoneNum1" prefWidth="114.0" text="Phone Number" />
+                                                <TableColumn fx:id="addEmployee_col_epfNo1" prefWidth="91.0" text="EPF NO:" />
+                                             </columns>
+                                          </TableView>
+                                          <TextField fx:id="addEmployee_search1" layoutX="320.0" layoutY="14.0" onKeyTyped="#addEmployeeSearchsecond" prefHeight="30.0" prefWidth="245.0" promptText="Search" stylesheets="@dashboardDesign.css" />
+                                          <FontAwesomeIcon glyphName="SEARCH" layoutX="547.0" layoutY="33.0" />
+                                       </children>
+                                       <styleClass>
+                                          <String fx:value="white-bg" />
+                                          <String fx:value="shadow" />
+                                       </styleClass>
+                                    </AnchorPane>
+                                 </children>
                               </AnchorPane>
                               <AnchorPane layoutX="5.0" layoutY="1.0" prefHeight="157.0" prefWidth="894.0" stylesheets="@dashboardDesign.css" AnchorPane.bottomAnchor="407.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="11.0" AnchorPane.topAnchor="1.0">
                                  <styleClass>

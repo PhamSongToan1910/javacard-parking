@@ -24,9 +24,7 @@ public class TechCompany extends Application {
     
     @Override
     public void start(Stage stage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("dashboard.fxml"));
-        loader.setControllerFactory(param -> new Dashboardcontroller());
-        Parent root = loader.load();
+        Parent root = FXMLLoader.load(getClass().getResource("FXMLDocument.fxml"));
         
         Scene scene = new Scene(root);
         
