@@ -1,27 +1,41 @@
 package techcompany.entities;
 
+import java.math.BigDecimal;
+
 public class Car {
     private int id;
     private String idCard;
     private String publicKey;
     private String owner;
-    private String branch;
+    private String model;
+    private String type;
     private String color;
     private String numberOfCar;
-    private String balance;
+    private BigDecimal balance;
+    private String pin;
 
     public Car() {
     }
 
-    public Car(int id, String idCard, String publicKey, String owner, String branch, String color, String numberOfCar, String balance) {
-        this.id = id;
+    public Car(String idCard, String publicKey, String owner, String model, String type, String color, String numberOfCar, BigDecimal balance, String pin) {
         this.idCard = idCard;
         this.publicKey = publicKey;
         this.owner = owner;
-        this.branch = branch;
+        this.model = model;
+        this.type = type;
         this.color = color;
         this.numberOfCar = numberOfCar;
         this.balance = balance;
+        this.pin = pin;
+    }
+
+    public Car(String owner, String model, String type, String color, String numberOfCar, String pin) {
+        this.owner = owner;
+        this.model = model;
+        this.type = type;
+        this.color = color;
+        this.numberOfCar = numberOfCar;
+        this.pin = pin;
     }
 
     public int getId() {
@@ -56,12 +70,20 @@ public class Car {
         this.owner = owner;
     }
 
-    public String getBranch() {
-        return branch;
+    public String getModel() {
+        return model;
     }
 
-    public void setBranch(String branch) {
-        this.branch = branch;
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getColor() {
@@ -80,11 +102,24 @@ public class Car {
         this.numberOfCar = numberOfCar;
     }
 
-    public String getBalance() {
+    public BigDecimal getBalance() {
         return balance;
     }
 
-    public void setBalance(String balance) {
+    public void setBalance(BigDecimal balance) {
         this.balance = balance;
+    }
+
+    public String getPin() {
+        return pin;
+    }
+
+    public void setPin(String pin) {
+        this.pin = pin;
+    }
+
+    @Override
+    public String toString() {
+        return this.numberOfCar + "@" + this.model + "@" + this.type + "@" + this.color + "@" + this.owner + "@" + this.pin;
     }
 }
