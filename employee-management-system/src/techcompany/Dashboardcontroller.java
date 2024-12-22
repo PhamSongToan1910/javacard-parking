@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 import techcompany.entities.Car;
 import techcompany.entities.Response;
 import techcompany.service.CarService;
+import techcompany.service.BalanceService;
 import techcompany.util.Constant;
 import techcompany.util.Utils;
 
@@ -44,10 +45,14 @@ public class Dashboardcontroller implements Initializable {
 
     @FXML
     public Label label_show_noti_form_create;
-    
+
+    @FXML
+    public Label label_show_noti_form_balance;
+
+
     @FXML
     public TextField id_card;
-    
+
     @FXML
     public TextField type_of_car;
 
@@ -105,7 +110,24 @@ public class Dashboardcontroller implements Initializable {
     private ResultSet result;
     private byte[] imageByte;
 
+    // Thêm các phần tử liên quan đến chức năng nạp/trừ tiền
+    @FXML
+    private Label balanceLabel;
+
+    @FXML
+    private TextField amountInput;
+
+    @FXML
+    private Button depositButton;
+
+    @FXML
+    private Button withdrawButton;
+
+    private BalanceService balanceService;
+
     public Dashboardcontroller() {
+        // Khởi tạo số dư ban đầu (giả sử là 1 triệu đồng)
+        balanceService = new BalanceService(1000000);
     }
 
 
@@ -150,6 +172,7 @@ public class Dashboardcontroller implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         id_card.setEditable(false);
+        balanceLabel.setText("Số dư: " + balanceService.getBalance() + " đ");
     }
 
     public void enableCard() {
@@ -212,6 +235,35 @@ public class Dashboardcontroller implements Initializable {
             System.out.println("Không có ảnh nào được chọn.");
         }
         return null;
+    }
+
+
+    // Xử lý sự kiện nạp tiền
+    @FXML
+    public void handleDeposit(ActionEvent event) {
+        try {
+            double amount = Double.parseDouble(amountInput.getText());
+            String message = balanceService.deposit(amount);
+            balanceLabel.setText("Số dư: " + balanceService.getBalance() + " đ");
+            amountInput.clear();
+            label_show_noti_form_balance.setText(message);
+        } catch (NumberFormatException e) {
+            label_show_noti_form_balance.setText("Vui lòng nhập số tiền hợp lệ!");
+        }
+    }
+
+    // Xử lý sự kiện trừ tiền
+    @FXML
+    public void handleWithdraw(ActionEvent event) {
+        try {
+            double amount = Double.parseDouble(amountInput.getText());
+            String message = balanceService.withdraw(amount);
+            balanceLabel.setText("Số dư: " + balanceService.getBalance() + " đ");
+            amountInput.clear();
+            label_show_noti_form_balance.setText(message);
+        } catch (NumberFormatException e) {
+            label_show_noti_form_balance.setText("Vui lòng nhập số tiền hợp lệ!");
+        }
     }
 
 }
