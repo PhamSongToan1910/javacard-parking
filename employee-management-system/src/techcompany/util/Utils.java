@@ -2,6 +2,8 @@ package techcompany.util;
 
 import techcompany.entities.Response;
 
+import java.security.PublicKey;
+import java.security.Signature;
 import java.util.List;
 import javax.smartcardio.Card;
 import javax.smartcardio.CardChannel;
@@ -13,6 +15,8 @@ import javax.smartcardio.TerminalFactory;
 public class Utils {
 
     public static final byte[] AID_APPLET = {(byte)0x11, (byte)0x22, (byte)0x33, (byte)0x44, (byte)0x55, (byte)0x66};
+
+//    public PublicKey publicKey =
 
     public static Response connectCardAndGetID() {
         try {
@@ -60,6 +64,54 @@ public class Utils {
         }
     }
 
+//    public static void sendData(byte cla, byte ins, byte p1, byte p2, byte lc, byte[] data) {
+//        try {
+//            TerminalFactory factory = TerminalFactory.getDefault();
+//            List<CardTerminal> terminals = factory.terminals().list();
+//            if (terminals.isEmpty()) {
+//                return new Response(Constant.UNKNOWN_ERROR, "No card terminal found!");
+//            }
+//
+//            CardTerminal terminal = terminals.get(0);
+//            Card card = terminal.connect("T=0");
+//            CardChannel channel = card.getBasicChannel();
+//            if (channel == null) {
+//                return new Response(Constant.CHANEL_NULL, "Channel is null");
+//            }
+//
+//            byte[] commandAPDU = new byte[5 + lc];
+//            commandAPDU[0] = 0x00;
+//            commandAPDU[1] = 0x02;
+//            commandAPDU[2] = 0x00;
+//            commandAPDU[3] = 0x00;
+//            commandAPDU[4] = 0x06;
+//
+//            if (data != null && lc > 0) {
+//                System.arraycopy(data, 0, commandAPDU, 5, lc);
+//            }
+//
+//            ResponseAPDU response = channel.transmit(new CommandAPDU(commandAPDU));
+//
+//            if (response.getSW() == 0x9000) {
+//                byte[] responseData = response.getData();
+//
+//                boolean isVerified = verifySignature("SUCCESS".getBytes(), responseData, publicKey);
+//                if (isVerified) {
+//                    System.out.println("Thẻ xác thực thành công!");
+//                } else {
+//                    System.out.println("Thẻ giả hoặc lỗi xác thực!");
+//                }
+//
+//                return new Response(Constant.SUCCESS, bytesToHex(responseData));
+//            } else {
+//                return new Response(Constant.UNKNOWN_ERROR, "Command failed, SW=" + Integer.toHexString(response.getSW()));
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return new Response(Constant.UNKNOWN_ERROR, "Exception occurred: " + e.getMessage());
+//        }
+//    }
+
     private static String bytesToHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {
@@ -67,5 +119,13 @@ public class Utils {
         }
         return sb.toString();
     }
+
+    public boolean verifySignature(byte[] message, byte[] signature, PublicKey publicKey) throws Exception {
+        Signature sig = Signature.getInstance("SHA256withRSA");
+        sig.initVerify(publicKey);
+        sig.update(message);
+        return sig.verify(signature);
+    }
+
 
 }
