@@ -23,6 +23,9 @@ import techcompany.service.BalanceService;
 import techcompany.util.Constant;
 import techcompany.util.Utils;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -227,6 +230,12 @@ public class Dashboardcontroller implements Initializable {
                 choose_image_view.setFitHeight(120);
                 choose_image_view.setPreserveRatio(false);
                 choose_image_view.setSmooth(true);
+                byte ins = (byte) 00;
+                byte lc = (byte) imageByte.length;
+                Response response = Utils.sendData(ins, lc, imageByte);
+                if(response.errorCode == Constant.SUCCESS) {
+                    System.out.println("Image chosen");
+                }
                 return imageByte;
             } catch (IOException e) {
                 e.printStackTrace();
