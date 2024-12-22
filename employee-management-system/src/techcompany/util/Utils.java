@@ -5,11 +5,17 @@
 
 package techcompany.util;
 
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
 import javax.smartcardio.Card;
 import javax.smartcardio.CardChannel;
 import javax.smartcardio.CardTerminal;
@@ -127,5 +133,54 @@ public class Utils {
 
             return byteArrayOutputStream.toByteArray();
         }
+    }
+
+    public static byte[] compressImageToTargetSize(BufferedImage image, int targetSizeInBytes) throws IOException {
+        // Lấy ImageWriter cho định dạng JPG
+        Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("jpg");
+        if (!writers.hasNext()) {
+            throw new IllegalStateException("Không tìm thấy ImageWriter cho định dạng JPG.");
+        }
+        ImageWriter writer = writers.next();
+
+        // Bắt đầu thử với chất lượng nén cao nhất và giảm dần
+        float quality = 1.0f;
+        byte[] imageBytes = null;
+
+        while (quality > 0.0f) {
+            System.out.println("quality: " + quality);
+            try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                 ImageOutputStream ios = ImageIO.createImageOutputStream(byteArrayOutputStream)) {
+                // Thiết lập đầu ra cho ImageWriter
+                writer.setOutput(ios);
+
+                // Cấu hình nén
+                ImageWriteParam param = writer.getDefaultWriteParam();
+                if (param.canWriteCompressed()) {
+                    param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+                    param.setCompressionQuality(quality); // Giảm chất lượng
+                }
+
+                // Ghi ảnh vào byte array
+                writer.write(null, new javax.imageio.IIOImage(image, null, null), param);
+
+                // Lấy dữ liệu ảnh nén
+                imageBytes = byteArrayOutputStream.toByteArray();
+                System.out.println("imageBytes: " + imageBytes.length);
+
+                // Kiểm tra kích thước byte[]
+                if (imageBytes.length <= targetSizeInBytes) {
+                    break; // Nếu đạt mục tiêu, thoát khỏi vòng lặp
+                }
+            }
+
+            // Giảm chất lượng nén thêm (ví dụ: giảm 10%)
+            quality -= quality * 0.5f;
+        }
+
+        writer.dispose();
+
+        // Trả về byte[] nếu đạt mục tiêu, ngược lại trả về null
+        return (imageBytes != null && imageBytes.length <= targetSizeInBytes) ? imageBytes : null;
     }
 }
