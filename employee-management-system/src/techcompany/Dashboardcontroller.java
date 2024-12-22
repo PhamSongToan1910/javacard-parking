@@ -172,6 +172,7 @@ public class Dashboardcontroller implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         id_card.setEditable(false);
+        balanceLabel.setText("Số dư: " + balanceService.getBalance() + " đ");
     }
 
     public void enableCard() {
@@ -265,9 +266,4 @@ public class Dashboardcontroller implements Initializable {
         }
     }
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        // Hiển thị số dư ban đầu
-        balanceLabel.setText("Số dư: " + balanceService.getBalance() + " đ");
-    }
 }
