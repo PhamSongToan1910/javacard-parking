@@ -1,6 +1,6 @@
 # Ignore everything
 ../out
-
+module-info.java
 # But not these files...
 !.gitignore
 !src/
