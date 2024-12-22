@@ -1,60 +1,102 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
 package techcompany.util;
 
-import techcompany.entities.Response;
-
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.List;
 import javax.smartcardio.Card;
 import javax.smartcardio.CardChannel;
 import javax.smartcardio.CardTerminal;
-import javax.smartcardio.ResponseAPDU;
 import javax.smartcardio.CommandAPDU;
+import javax.smartcardio.ResponseAPDU;
 import javax.smartcardio.TerminalFactory;
+import techcompany.entities.Response;
 
 public class Utils {
+    public static final byte[] SELECT_APPLET = new byte[]{17, 34, 51, 68, 85, 1};
 
-    public static final byte[] AID_APPLET = {(byte)0x11, (byte)0x22, (byte)0x33, (byte)0x44, (byte)0x55, (byte)0x66};
+    public Utils() {
+    }
 
     public static Response connectCardAndGetID() {
         try {
             TerminalFactory factory = TerminalFactory.getDefault();
             List<CardTerminal> terminals = factory.terminals().list();
             if (terminals.isEmpty()) {
-                return new Response(Constant.UNKNOWN_ERROR,"No card terminal found!");
-            }
-
-            CardTerminal terminal = terminals.get(0);
-            Card card = terminal.connect("T=0"); // Kết nối với thẻ qua giao thức T=0
-            CardChannel channel = card.getBasicChannel();
-            if (channel == null) {
-                return new Response(Constant.CHANEL_NULL, "Channel is null");
-            }
-
-            ResponseAPDU responseAPDU = channel.transmit(new CommandAPDU(0x00, 0xA4, 0x04, 0x00, AID_APPLET));
-            String check = Integer.toHexString(responseAPDU.getSW());
-            if (check.equals("9000")) {
-                // Gửi lệnh GET_ID để lấy ID từ applet
-                byte[] GET_ID_COMMAND = new byte[] {
-                        (byte) 0x00, // CLA (Class)
-                        (byte) 0x00, // INS (Instruction for "Get Data")
-                        (byte) 0x00, // P1
-                        (byte) 0x00// Le (Expected length of data)
-                };
-                ResponseAPDU idResponse = channel.transmit(new CommandAPDU(GET_ID_COMMAND));
-
-                // Kiểm tra mã trạng thái trả về
-                if (idResponse.getSW() == 0x9000) {
-                    // Chuyển dữ liệu nhận được thành chuỗi hoặc số
-                    byte[] idData = idResponse.getData();
-                    return new Response(Constant.SUCCESS, bytesToHex(idData));
-                } else {
-                    return new Response(Constant.UNKNOWN_ERROR,"Failed to get ID, SW=" + Integer.toHexString(idResponse.getSW()));
-                }
-            } else if (check.equals("6400")) {
-                return new Response(Constant.INVALID_CARD, "Invalid Card");
+                return new Response(Constant.UNKNOWN_ERROR, "No card terminal found!");
             } else {
-                return new Response(Constant.UNKNOWN_ERROR, "Unknown error during SELECT, SW=" + check);
+                CardTerminal terminal = (CardTerminal)terminals.get(0);
+                Card card = terminal.connect("T=0");
+                CardChannel channel = card.getBasicChannel();
+                if (channel == null) {
+                    return new Response(Constant.CHANEL_NULL, "Channel is null");
+                } else {
+                    ResponseAPDU responseAPDU = channel.transmit(new CommandAPDU(0, 164, 4, 0, SELECT_APPLET));
+                    String check = Integer.toHexString(responseAPDU.getSW());
+                    if (check.equals("9000")) {
+                        byte[] GET_ID_COMMAND = new byte[]{0, 0, 0, 0};
+                        ResponseAPDU idResponse = channel.transmit(new CommandAPDU(GET_ID_COMMAND));
+                        if (idResponse.getSW() == 36864) {
+                            byte[] idData = idResponse.getData();
+                            return new Response(Constant.SUCCESS, bytesToHex(idData));
+                        } else {
+                            return new Response(Constant.UNKNOWN_ERROR, "Failed to get ID, SW=" + Integer.toHexString(idResponse.getSW()));
+                        }
+                    } else {
+                        return check.equals("6400") ? new Response(Constant.INVALID_CARD, "Invalid Card") : new Response(Constant.UNKNOWN_ERROR, "Unknown error during SELECT, SW=" + check);
+                    }
+                }
             }
-        } catch (Exception exception) {
+        } catch (Exception var10) {
+            Exception exception = var10;
+            exception.printStackTrace();
+            return new Response(Constant.UNKNOWN_ERROR, "Exception occurred: " + exception.getMessage());
+        }
+    }
+
+    public static Response sendData(byte ins, byte lc, byte[] data) {
+        try {
+            TerminalFactory factory = TerminalFactory.getDefault();
+            List<CardTerminal> terminals = factory.terminals().list();
+            if (terminals.isEmpty()) {
+                return new Response(Constant.UNKNOWN_ERROR, "No card terminal found!");
+            } else {
+                CardTerminal terminal = (CardTerminal)terminals.get(0);
+                Card card = terminal.connect("T=0");
+                CardChannel channel = card.getBasicChannel();
+                if (channel == null) {
+                    return new Response(Constant.CHANEL_NULL, "Channel is null");
+                } else {
+                    ResponseAPDU responseAPDU = channel.transmit(new CommandAPDU(0, 164, 4, 0, SELECT_APPLET));
+                    String check = Integer.toHexString(responseAPDU.getSW());
+                    if (check.equals("9000")) {
+                        byte[] GET_ID_COMMAND = new byte[]{0, ins, 0, 0, lc};
+                        byte[] combined = new byte[GET_ID_COMMAND.length + data.length];
+
+                        for(int i = 0; i < combined.length; ++i) {
+                            combined[i] = i < GET_ID_COMMAND.length ? GET_ID_COMMAND[i] : data[i - GET_ID_COMMAND.length];
+                        }
+
+                        ResponseAPDU idResponse = channel.transmit(new CommandAPDU(GET_ID_COMMAND));
+                        if (idResponse.getSW() == 36864) {
+                            byte[] idData = idResponse.getData();
+                            return new Response(Constant.SUCCESS, bytesToHex(idData));
+                        } else {
+                            return new Response(Constant.UNKNOWN_ERROR, "Failed to get ID, SW=" + Integer.toHexString(idResponse.getSW()));
+                        }
+                    } else {
+                        return check.equals("6400") ? new Response(Constant.INVALID_CARD, "Invalid Card") : new Response(Constant.UNKNOWN_ERROR, "Unknown error during SELECT, SW=" + check);
+                    }
+                }
+            }
+        } catch (Exception var14) {
+            Exception exception = var14;
             exception.printStackTrace();
             return new Response(Constant.UNKNOWN_ERROR, "Exception occurred: " + exception.getMessage());
         }
@@ -62,9 +104,28 @@ public class Utils {
 
     private static String bytesToHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
-        for (byte b : bytes) {
+        byte[] var2 = bytes;
+        int var3 = bytes.length;
+
+        for(int var4 = 0; var4 < var3; ++var4) {
+            byte b = var2[var4];
             sb.append(String.format("%02X", b));
         }
+
         return sb.toString();
+    }
+
+    public static byte[] getBytesFromFile(File file) throws IOException {
+        try (FileInputStream fileInputStream = new FileInputStream(file);
+             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = fileInputStream.read(buffer)) != -1) {
+                byteArrayOutputStream.write(buffer, 0, bytesRead);
+            }
+
+            return byteArrayOutputStream.toByteArray();
+        }
     }
 }
