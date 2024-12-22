@@ -1,6 +1,10 @@
 # Ignore everything
+<<<<<<< HEAD:employee-management-system/.gitignore
 ../out
 
+=======
+*
+>>>>>>> 1235dde (changeconnect):.gitignore
 # But not these files...
 !.gitignore
 !src/

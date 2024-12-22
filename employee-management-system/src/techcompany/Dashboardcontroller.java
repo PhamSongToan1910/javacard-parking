@@ -195,13 +195,14 @@ public class Dashboardcontroller implements Initializable {
         String pinCode = String.valueOf(pin_code.getText());
         Car car = new Car(OwnerCar, modelCar, typeOfCar, colorCar, numberOfCar, pinCode);
         String carStr = car.toString();
+        System.out.println(carStr);
         byte[] bytes = carStr.getBytes(StandardCharsets.UTF_8);
-        byte ins = (byte) 00;
+        byte ins = (byte) 01;
         byte lc = (byte) bytes.length;
         Response response = Utils.sendData(ins, lc, bytes);
         if(response.errorCode == Constant.SUCCESS) {
             pinCode = "";
-            String publicKey = "";
+            String publicKey = response.getdata();
             BigDecimal balance = new BigDecimal("1000000.00");
             car.setBalance(balance);
             car.setPin(pinCode);

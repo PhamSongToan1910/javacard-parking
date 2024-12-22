@@ -1,7 +1,3 @@
-//
-// Source code recreated from a .class file by IntelliJ IDEA
-// (powered by FernFlower decompiler)
-//
 
 package techcompany.util;
 
@@ -9,6 +5,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import techcompany.entities.Response;
+
+import java.security.PublicKey;
+import java.security.Signature;
 import java.util.List;
 import javax.smartcardio.Card;
 import javax.smartcardio.CardChannel;
@@ -19,10 +19,12 @@ import javax.smartcardio.TerminalFactory;
 import techcompany.entities.Response;
 
 public class Utils {
-    public static final byte[] SELECT_APPLET = new byte[]{17, 34, 51, 68, 85, 1};
+    public static final byte[] SELECT_APPLET = new byte[]{0x11, 0x22, 0x33, 0x44, 0x55, 0x01};
 
     public Utils() {
     }
+
+//    public PublicKey publicKey =
 
     public static Response connectCardAndGetID() {
         try {
@@ -31,76 +33,91 @@ public class Utils {
             if (terminals.isEmpty()) {
                 return new Response(Constant.UNKNOWN_ERROR, "No card terminal found!");
             } else {
-                CardTerminal terminal = (CardTerminal)terminals.get(0);
+                CardTerminal terminal = terminals.get(0);
                 Card card = terminal.connect("T=0");
                 CardChannel channel = card.getBasicChannel();
+
                 if (channel == null) {
                     return new Response(Constant.CHANEL_NULL, "Channel is null");
-                } else {
-                    ResponseAPDU responseAPDU = channel.transmit(new CommandAPDU(0, 164, 4, 0, SELECT_APPLET));
-                    String check = Integer.toHexString(responseAPDU.getSW());
-                    if (check.equals("9000")) {
-                        byte[] GET_ID_COMMAND = new byte[]{0, 0, 0, 0};
-                        ResponseAPDU idResponse = channel.transmit(new CommandAPDU(GET_ID_COMMAND));
-                        if (idResponse.getSW() == 36864) {
-                            byte[] idData = idResponse.getData();
-                            return new Response(Constant.SUCCESS, bytesToHex(idData));
-                        } else {
-                            return new Response(Constant.UNKNOWN_ERROR, "Failed to get ID, SW=" + Integer.toHexString(idResponse.getSW()));
-                        }
-                    } else {
-                        return check.equals("6400") ? new Response(Constant.INVALID_CARD, "Invalid Card") : new Response(Constant.UNKNOWN_ERROR, "Unknown error during SELECT, SW=" + check);
-                    }
                 }
+                Response selectAppletResponse = selectApplet(channel);
+                if (selectAppletResponse.getErrorCode() != Constant.SUCCESS) {
+                    return selectAppletResponse;
+                }
+                return sendCommand(channel);
             }
-        } catch (Exception var10) {
-            Exception exception = var10;
-            exception.printStackTrace();
-            return new Response(Constant.UNKNOWN_ERROR, "Exception occurred: " + exception.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Response(Constant.UNKNOWN_ERROR, "Exception occurred: " + e.getMessage());
         }
     }
 
-    public static Response sendData(byte ins, byte lc, byte[] data) {
+    private static Response selectApplet(CardChannel channel) {
+        try {
+            ResponseAPDU responseAPDU =  channel.transmit(new CommandAPDU(0x00, 0xA4, 0x04, 0x00, SELECT_APPLET));
+            String statusWord = Integer.toHexString(responseAPDU.getSW());
+
+            if ("9000".equals(statusWord)) {
+                return new Response(Constant.SUCCESS, "Applet selected successfully");
+            } else if ("6400".equals(statusWord)) {
+                return new Response(Constant.INVALID_CARD, "Invalid Card");
+            } else {
+                return new Response(Constant.UNKNOWN_ERROR, "Unknown error during SELECT, SW=" + statusWord);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Response(Constant.UNKNOWN_ERROR, "Exception during SELECT: " + e.getMessage());
+        }
+    }
+
+    public static Response sendCommand(CardChannel channel) {
+        try {
+            byte[] GET_ID_COMMAND = new byte[]{0, 0, 0, 0};
+            ResponseAPDU idResponse = channel.transmit(new CommandAPDU(GET_ID_COMMAND));
+
+            if (idResponse.getSW() == 0x9000) { // Success
+                byte[] idData = idResponse.getData();
+                return new Response(Constant.SUCCESS, bytesToHex(idData));
+            } else {
+                return new Response(Constant.UNKNOWN_ERROR, "Failed to get ID, SW=" + Integer.toHexString(idResponse.getSW()));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Response(Constant.UNKNOWN_ERROR, "Exception during GET ID: " + e.getMessage());
+        }
+    }
+
+    public static Response sendData( byte ins, byte lc, byte[] data) {
         try {
             TerminalFactory factory = TerminalFactory.getDefault();
             List<CardTerminal> terminals = factory.terminals().list();
+
             if (terminals.isEmpty()) {
                 return new Response(Constant.UNKNOWN_ERROR, "No card terminal found!");
-            } else {
-                CardTerminal terminal = (CardTerminal)terminals.get(0);
-                Card card = terminal.connect("T=0");
-                CardChannel channel = card.getBasicChannel();
-                if (channel == null) {
-                    return new Response(Constant.CHANEL_NULL, "Channel is null");
-                } else {
-                    ResponseAPDU responseAPDU = channel.transmit(new CommandAPDU(0, 164, 4, 0, SELECT_APPLET));
-                    String check = Integer.toHexString(responseAPDU.getSW());
-                    if (check.equals("9000")) {
-                        byte[] GET_ID_COMMAND = new byte[]{0, ins, 0, 0, lc};
-                        byte[] combined = new byte[GET_ID_COMMAND.length + data.length];
-
-                        for(int i = 0; i < combined.length; ++i) {
-                            combined[i] = i < GET_ID_COMMAND.length ? GET_ID_COMMAND[i] : data[i - GET_ID_COMMAND.length];
-                        }
-
-                        ResponseAPDU idResponse = channel.transmit(new CommandAPDU(GET_ID_COMMAND));
-                        if (idResponse.getSW() == 36864) {
-                            byte[] idData = idResponse.getData();
-                            return new Response(Constant.SUCCESS, bytesToHex(idData));
-                        } else {
-                            return new Response(Constant.UNKNOWN_ERROR, "Failed to get ID, SW=" + Integer.toHexString(idResponse.getSW()));
-                        }
-                    } else {
-                        return check.equals("6400") ? new Response(Constant.INVALID_CARD, "Invalid Card") : new Response(Constant.UNKNOWN_ERROR, "Unknown error during SELECT, SW=" + check);
-                    }
-                }
             }
-        } catch (Exception var14) {
-            Exception exception = var14;
-            exception.printStackTrace();
-            return new Response(Constant.UNKNOWN_ERROR, "Exception occurred: " + exception.getMessage());
+
+            CardTerminal terminal = terminals.get(0);
+            Card card = terminal.connect("T=0");
+            CardChannel channel = card.getBasicChannel();
+
+            byte[] commandData = new byte[1 + data.length];
+            commandData[0] = lc;
+            System.arraycopy(data, 0, commandData, 1, data.length);
+            CommandAPDU commandAPDU = new CommandAPDU(0x00, ins, 0x00, 0x00, commandData);
+            ResponseAPDU responseAPDU = channel.transmit(commandAPDU);
+
+            if (responseAPDU.getSW() == 0x9000) { // Success
+                byte[] responseData = responseAPDU.getData();
+                return new Response(Constant.SUCCESS, bytesToHex(responseData));
+            } else {
+                return new Response(Constant.UNKNOWN_ERROR, "Failed to send data, SW=" + Integer.toHexString(responseAPDU.getSW()));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Response(Constant.UNKNOWN_ERROR, "Exception during SEND DATA: " + e.getMessage());
         }
     }
+
 
     private static String bytesToHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
@@ -114,7 +131,6 @@ public class Utils {
 
         return sb.toString();
     }
-
     public static byte[] getBytesFromFile(File file) throws IOException {
         try (FileInputStream fileInputStream = new FileInputStream(file);
              ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
@@ -128,4 +144,11 @@ public class Utils {
             return byteArrayOutputStream.toByteArray();
         }
     }
+    public boolean verifySignature(byte[] message, byte[] signature, PublicKey publicKey) throws Exception {
+        Signature sig = Signature.getInstance("SHA256withRSA");
+        sig.initVerify(publicKey);
+        sig.update(message);
+        return sig.verify(signature);
+    }
+
 }
