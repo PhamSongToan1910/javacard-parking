@@ -165,10 +165,8 @@ public class Dashboardcontroller implements Initializable {
 
     private BalanceService balanceService;
 
-    private int soTien;
-
     public Dashboardcontroller() {
-
+        balanceService = new BalanceService(0.0);
     }
 
 
@@ -211,9 +209,8 @@ public class Dashboardcontroller implements Initializable {
     }
 
     @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        id_card.setEditable(false);
-        balanceLabel.setText("Số dư: " + balanceService.getBalance() + " đ");
+    public void initialize(URL location, ResourceBundle resources){
+
     }
 
     public void enableCard() {

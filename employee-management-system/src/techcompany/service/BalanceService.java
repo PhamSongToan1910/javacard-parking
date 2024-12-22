@@ -9,6 +9,10 @@ public class BalanceService {
         this.balance = initialBalance;
     }
 
+    public void setBalance(double balance) {
+        this.balance = balance;
+    }
+
     // Method to get the current balance
     public double getBalance() {
         return balance;
