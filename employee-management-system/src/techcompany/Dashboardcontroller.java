@@ -11,6 +11,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.paint.Color;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -22,6 +23,9 @@ import techcompany.service.CarService;
 import techcompany.service.BalanceService;
 import techcompany.util.Constant;
 import techcompany.util.Utils;
+import javafx.stage.FileChooser;
+import java.io.File;
+import javafx.scene.image.Image;
 
 import java.io.File;
 import java.io.IOException;
@@ -104,6 +108,42 @@ public class Dashboardcontroller implements Initializable {
     @FXML
     private AnchorPane depDesig_form;
 
+    // Start khai báo button của phần kết nối
+    @FXML
+    private Label pinErrorText;
+    @FXML
+    private Label idLabel;
+    @FXML
+    private Label ownerNameLabel;
+    @FXML
+    private Label carModelLabel;
+    @FXML
+    private Label carColorLabel;
+    @FXML
+    private Label licensePlateLabel;
+    @FXML
+    private Label carBranchLabel;
+    @FXML
+    private Label statusLabel;
+    @FXML
+    private TextField pinInput;
+
+    @FXML
+    private Button disconnectCardBtn;
+
+    @FXML
+    private Button connectCardBtn;
+
+    @FXML
+    private Button updateImageBtn;
+
+    @FXML
+    ImageView imgPreview;
+
+    // End khai báo button của phần kết nói
+
+    private int incorrectPinAttempts = 0;
+    private int MAX_INCORRECT_ATTEMPTS = 5;
     private Connection connect;
     private Statement statement;
     private PreparedStatement prepare;
@@ -125,9 +165,10 @@ public class Dashboardcontroller implements Initializable {
 
     private BalanceService balanceService;
 
+    private int soTien;
+
     public Dashboardcontroller() {
-        // Khởi tạo số dư ban đầu (giả sử là 1 triệu đồng)
-        balanceService = new BalanceService(1000000);
+
     }
 
 
@@ -185,6 +226,60 @@ public class Dashboardcontroller implements Initializable {
         }
     }
 
+
+
+    //Logic cho tab kết nối
+    @FXML
+    private void handleConnectCard() {
+        String pin = pinInput.getText();
+        if (isValidPin(pin)) {
+            byte[] pinBytes = pin.getBytes(StandardCharsets.UTF_8);
+            byte ins = (byte) 02;
+            byte lc = (byte) pinBytes.length;
+            Response response = Utils.saveAndGetData(ins, lc, pinBytes);
+            if(response.errorCode == Constant.SUCCESS) {
+                String infor = response.getdata();
+                String[] parts = infor.split("@");
+                licensePlateLabel.setText(parts[0]);
+                carBranchLabel.setText(parts[1]);
+                carModelLabel.setText(parts[2]);
+                carColorLabel.setText(parts[3]);
+                ownerNameLabel.setText(parts[4]);
+            }
+            else {
+                incorrectPinAttempts++;
+                if (incorrectPinAttempts >= MAX_INCORRECT_ATTEMPTS) {
+                    connectCardBtn.setDisable(true);
+                    pinErrorText.setVisible(true);
+                    pinErrorText.setText("Bạn đã nhập sai mã PIN quá 3 lần. Vui lòng thử lại sau.");
+                } else {
+                    pinErrorText.setVisible(true);
+                    int remainingAttempts = MAX_INCORRECT_ATTEMPTS - incorrectPinAttempts;
+                    pinErrorText.setText("Sai mã PIN: Bạn còn " + remainingAttempts + " lần nhập lại");
+                }
+            }
+        } else {
+            // Display an error message for invalid PIN
+            pinErrorText.setVisible(true);
+            pinErrorText.setText("Invalid PIN. Please enter a valid PIN.");
+        }
+    }
+
+    @FXML
+    private void handleDisconnectCard() {
+
+    }
+
+    @FXML
+    private void handleEditAvatar() {
+
+    }
+
+
+    // Helper method to validate PIN code
+    private boolean isValidPin(String pin) {
+        return pin != null && !pin.isEmpty();
+    }
     public void createCar() {
         String idCard = id_card.getText();
         String OwnerCar = OwnerName.getText();
@@ -195,11 +290,10 @@ public class Dashboardcontroller implements Initializable {
         String pinCode = String.valueOf(pin_code.getText());
         Car car = new Car(OwnerCar, modelCar, typeOfCar, colorCar, numberOfCar, pinCode);
         String carStr = car.toString();
-        System.out.println(carStr);
         byte[] bytes = carStr.getBytes(StandardCharsets.UTF_8);
         byte ins = (byte) 01;
         byte lc = (byte) bytes.length;
-        Response response = Utils.sendData(ins, lc, bytes);
+        Response response = Utils.saveAndGetData(ins, lc, bytes);
         if(response.errorCode == Constant.SUCCESS) {
             pinCode = "";
             String publicKey = response.getdata();

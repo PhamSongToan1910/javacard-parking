@@ -19,35 +19,37 @@ import javax.smartcardio.TerminalFactory;
 import techcompany.entities.Response;
 
 public class Utils {
+
     public static final byte[] SELECT_APPLET = new byte[] { 0x11, 0x22, 0x33, 0x44, 0x55, 0x01 };
+
+    // public PublicKey publicKey =
+
+    private static CardChannel cardChannel = null; // Duy trì CardChannel toàn cục
 
     public Utils() {
     }
 
-    // public PublicKey publicKey =
-
-    // public PublicKey publicKey =
-
     public static Response connectCardAndGetID() {
         try {
-            TerminalFactory factory = TerminalFactory.getDefault();
-            List<CardTerminal> terminals = factory.terminals().list();
-            if (terminals.isEmpty()) {
-                return new Response(Constant.UNKNOWN_ERROR, "No card terminal found!");
-            } else {
-                CardTerminal terminal = terminals.get(0);
-                Card card = terminal.connect("T=0");
-                CardChannel channel = card.getBasicChannel();
-
-                if (channel == null) {
-                    return new Response(Constant.CHANEL_NULL, "Channel is null");
+            if (cardChannel == null) {
+                TerminalFactory factory = TerminalFactory.getDefault();
+                List<CardTerminal> terminals = factory.terminals().list();
+                if (terminals.isEmpty()) {
+                    return new Response(Constant.UNKNOWN_ERROR, "No card terminal found!");
+                } else {
+                    CardTerminal terminal = terminals.get(0);
+                    Card card = terminal.connect("T=0");
+                    cardChannel = card.getBasicChannel(); // Duy trì CardChannel
+                    if (cardChannel == null) {
+                        return new Response(Constant.CHANEL_NULL, "Channel is null");
+                    }
+                    Response selectAppletResponse = selectApplet(cardChannel);
+                    if (selectAppletResponse.getErrorCode() != Constant.SUCCESS) {
+                        return selectAppletResponse;
+                    }
                 }
-                Response selectAppletResponse = selectApplet(channel);
-                if (selectAppletResponse.getErrorCode() != Constant.SUCCESS) {
-                    return selectAppletResponse;
-                }
-                return sendCommand(channel);
             }
+            return sendCommand(cardChannel);
         } catch (Exception e) {
             e.printStackTrace();
             return new Response(Constant.UNKNOWN_ERROR, "Exception occurred: " + e.getMessage());
@@ -77,7 +79,7 @@ public class Utils {
             byte[] GET_ID_COMMAND = new byte[] { 0, 0, 0, 0 };
             ResponseAPDU idResponse = channel.transmit(new CommandAPDU(GET_ID_COMMAND));
 
-            if (idResponse.getSW() == 0x9000) { // Success
+            if (idResponse.getSW() == 0x9000) {
                 byte[] idData = idResponse.getData();
                 return new Response(Constant.SUCCESS, bytesToHex(idData));
             } else {
@@ -90,28 +92,17 @@ public class Utils {
         }
     }
 
-    public static Response sendData(byte ins, byte lc, byte[] data) {
+    public static Response saveAndGetData(byte ins, byte lc, byte[] data) {
         try {
-            TerminalFactory factory = TerminalFactory.getDefault();
-            List<CardTerminal> terminals = factory.terminals().list();
-
-            if (terminals.isEmpty()) {
-                return new Response(Constant.UNKNOWN_ERROR, "No card terminal found!");
+            if (cardChannel == null) {
+                return new Response(Constant.UNKNOWN_ERROR, "No card channel available!");
             }
+            CommandAPDU commandAPDU = new CommandAPDU(0x00, ins, 0x00, 0x00, data);
+            ResponseAPDU responseAPDU = cardChannel.transmit(commandAPDU);
 
-            CardTerminal terminal = terminals.get(0);
-            Card card = terminal.connect("T=0");
-            CardChannel channel = card.getBasicChannel();
-
-            byte[] commandData = new byte[1 + data.length];
-            commandData[0] = lc;
-            System.arraycopy(data, 0, commandData, 1, data.length);
-            CommandAPDU commandAPDU = new CommandAPDU(0x00, ins, 0x00, 0x00, commandData);
-            ResponseAPDU responseAPDU = channel.transmit(commandAPDU);
-
-            if (responseAPDU.getSW() == 0x9000) { // Success
+            if (responseAPDU.getSW() == 0x9000) {
                 byte[] responseData = responseAPDU.getData();
-                return new Response(Constant.SUCCESS, bytesToHex(responseData));
+                return new Response(Constant.SUCCESS, hexToString(bytesToHex(responseData)));
             } else {
                 return new Response(Constant.UNKNOWN_ERROR,
                         "Failed to send data, SW=" + Integer.toHexString(responseAPDU.getSW()));
@@ -124,14 +115,18 @@ public class Utils {
 
     private static String bytesToHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
-        byte[] var2 = bytes;
-        int var3 = bytes.length;
-
-        for (int var4 = 0; var4 < var3; ++var4) {
-            byte b = var2[var4];
+        for (byte b : bytes) {
             sb.append(String.format("%02X", b));
         }
+        return sb.toString();
+    }
 
+    public static String hexToString(String hex) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < hex.length(); i += 2) {
+            String str = hex.substring(i, i + 2);
+            sb.append((char) Integer.parseInt(str, 16)); // Chuyển đổi từ hex sang ký tự
+        }
         return sb.toString();
     }
 
@@ -155,6 +150,4 @@ public class Utils {
         sig.update(message);
         return sig.verify(signature);
     }
-
-
 }

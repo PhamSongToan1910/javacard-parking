@@ -1,10 +1,7 @@
 # Ignore everything
-<<<<<<< HEAD:employee-management-system/.gitignore
 ../out
-
-=======
 *
->>>>>>> 1235dde (changeconnect):.gitignore
+module-info.java
 # But not these files...
 !.gitignore
 !employee-management-system/
