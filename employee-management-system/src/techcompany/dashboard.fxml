@@ -8,8 +8,7 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 
-<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon?>
-<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="techcompany.Dashboardcontroller">
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="techcompany.Dashboardcontroller">
    <children>
       <AnchorPane fx:id="main_form" prefHeight="200.0" prefWidth="200.0">
          <children>
@@ -146,7 +145,7 @@
                                           <String fx:value="shadow" />
                                        </styleClass>
                                        <children>
-                                          <Button fx:id="choose_image" layoutX="728.0" layoutY="33.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="99.0" styleClass="add-btn" onAction="#chooseimage" stylesheets="@dashboardDesign.css" text="Thêm ảnh" />
+                                          <Button fx:id="choose_image" layoutX="728.0" layoutY="33.0" mnemonicParsing="false" onAction="#chooseimage" prefHeight="36.0" prefWidth="99.0" styleClass="add-btn" stylesheets="@dashboardDesign.css" text="Thêm ảnh" />
                                           <Label alignment="CENTER_RIGHT" layoutX="80.0" layoutY="87.0" text="ID:">
                                              <font>
                                                 <Font name="Arial Bold" size="18.0" />
@@ -227,7 +226,7 @@
                                                 <Font size="18.0" />
                                              </font>
                                           </TextField>
-                                          <Button fx:id="add_car" layoutX="601.0" layoutY="368.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="79.0" onAction="#createCar" styleClass="add-btn" stylesheets="@dashboardDesign.css" text="Lưu" />
+                                          <Button fx:id="add_car" layoutX="601.0" layoutY="368.0" mnemonicParsing="false" onAction="#createCar" prefHeight="36.0" prefWidth="79.0" styleClass="add-btn" stylesheets="@dashboardDesign.css" text="Lưu" />
                                           <Label alignment="CENTER_RIGHT" layoutX="33.0" layoutY="24.0" text="Nhập thông tin thẻ:">
                                              <font>
                                                 <Font name="Arial Bold" size="24.0" />
@@ -340,7 +339,7 @@
                               </AnchorPane>
                            </children>
                         </AnchorPane>
-                        <AnchorPane fx:id="addUser_form" prefHeight="555.0" prefWidth="900.0">
+                        <AnchorPane fx:id="addUser_form" prefHeight="555.0" prefWidth="900.0" visible="false">
                            <children>
                               <AnchorPane layoutX="8.0" layoutY="3.0" prefHeight="559.0" prefWidth="895.0" stylesheets="@dashboardDesign.css" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="7.0" AnchorPane.topAnchor="3.0">
                                  <styleClass>
@@ -390,7 +389,7 @@
                               </AnchorPane>
                            </children>
                         </AnchorPane>
-                        <AnchorPane fx:id="depDesig_form" prefHeight="555.0" prefWidth="900.0" visible="false">
+                        <AnchorPane fx:id="depDesig_form" prefHeight="555.0" prefWidth="900.0">
                            <children>
                               <AnchorPane layoutX="8.0" layoutY="3.0" prefHeight="559.0" prefWidth="895.0" stylesheets="@dashboardDesign.css" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="7.0" AnchorPane.topAnchor="3.0">
                                  <styleClass>
@@ -419,32 +418,20 @@
                                                 <Font name="Arial Bold" size="18.0" />
                                              </font>
                                           </Label>
-                                          <TextField fx:id="addEmployee_employeeID11111" layoutX="219.0" layoutY="123.0" prefHeight="39.0" prefWidth="484.0" promptText="Input mã PIN" stylesheets="@dashboardDesign.css">
-                                             <font>
-                                                <Font size="18.0" />
-                                             </font>
-                                          </TextField>
-                                          <TextField fx:id="addEmployee_employeeID111111" layoutX="219.0" layoutY="208.0" prefHeight="39.0" prefWidth="483.0" promptText="Input mã PIN" stylesheets="@dashboardDesign.css">
-                                             <font>
-                                                <Font size="18.0" />
-                                             </font>
-                                          </TextField>
-                                          <TextField fx:id="addEmployee_employeeID111121" layoutX="219.0" layoutY="293.0" prefHeight="39.0" prefWidth="487.0" promptText="Input mã PIN" stylesheets="@dashboardDesign.css">
-                                             <font>
-                                                <Font size="18.0" />
-                                             </font>
-                                          </TextField>
-                                          <Button fx:id="addEmployee_add_btn11311" layoutX="625.0" layoutY="378.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="79.0" styleClass="add-btn" stylesheets="@dashboardDesign.css" text="Xác nhận" />
+                                          <Button fx:id="getChangePin_btn" layoutX="625.0" layoutY="378.0" mnemonicParsing="false" onAction="#handleConfirmButton" prefHeight="36.0" prefWidth="79.0" styleClass="add-btn" stylesheets="@dashboardDesign.css" text="Xác nhận" />
                                           <Label alignment="CENTER_RIGHT" layoutX="57.0" layoutY="59.0" text="Thay đổi mã PIN">
                                              <font>
                                                 <Font name="Arial Bold" size="24.0" />
                                              </font>
                                           </Label>
-                                          <Label alignment="CENTER_RIGHT" layoutX="219.0" layoutY="341.0" text="Báo lỗi nếu không đúng" textFill="#ff6a6a">
+                                          <Label fx:id="errorLabel" alignment="CENTER_RIGHT" layoutX="219.0" layoutY="341.0" text="Báo lỗi nếu không đúng" textFill="#ff6a6a">
                                              <font>
                                                 <Font name="Arial Bold" size="18.0" />
                                              </font>
                                           </Label>
+                                          <PasswordField fx:id="oldPinField" layoutX="219.0" layoutY="120.0" prefHeight="46.0" prefWidth="485.0" promptText="Nhập mã PIN cũ" />
+                                          <PasswordField fx:id="newPinField" layoutX="219.0" layoutY="205.0" prefHeight="46.0" prefWidth="485.0" promptText="Nhập mã PIN mới" />
+                                          <PasswordField fx:id="confirmPinField" layoutX="219.0" layoutY="290.0" prefHeight="46.0" prefWidth="485.0" promptText="Nhập lại mã PIN" />
                                        </children>
                                     </AnchorPane>
                                  </children>
