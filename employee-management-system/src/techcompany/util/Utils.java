@@ -19,12 +19,14 @@ import javax.smartcardio.TerminalFactory;
 import techcompany.entities.Response;
 
 public class Utils {
-    public static final byte[] SELECT_APPLET = new byte[]{0x11, 0x22, 0x33, 0x44, 0x55, 0x01};
+    public static final byte[] SELECT_APPLET = new byte[] { 0x11, 0x22, 0x33, 0x44, 0x55, 0x01 };
 
     public Utils() {
     }
 
-//    public PublicKey publicKey =
+    // public PublicKey publicKey =
+
+    // public PublicKey publicKey =
 
     public static Response connectCardAndGetID() {
         try {
@@ -54,7 +56,7 @@ public class Utils {
 
     private static Response selectApplet(CardChannel channel) {
         try {
-            ResponseAPDU responseAPDU =  channel.transmit(new CommandAPDU(0x00, 0xA4, 0x04, 0x00, SELECT_APPLET));
+            ResponseAPDU responseAPDU = channel.transmit(new CommandAPDU(0x00, 0xA4, 0x04, 0x00, SELECT_APPLET));
             String statusWord = Integer.toHexString(responseAPDU.getSW());
 
             if ("9000".equals(statusWord)) {
@@ -72,14 +74,15 @@ public class Utils {
 
     public static Response sendCommand(CardChannel channel) {
         try {
-            byte[] GET_ID_COMMAND = new byte[]{0, 0, 0, 0};
+            byte[] GET_ID_COMMAND = new byte[] { 0, 0, 0, 0 };
             ResponseAPDU idResponse = channel.transmit(new CommandAPDU(GET_ID_COMMAND));
 
             if (idResponse.getSW() == 0x9000) { // Success
                 byte[] idData = idResponse.getData();
                 return new Response(Constant.SUCCESS, bytesToHex(idData));
             } else {
-                return new Response(Constant.UNKNOWN_ERROR, "Failed to get ID, SW=" + Integer.toHexString(idResponse.getSW()));
+                return new Response(Constant.UNKNOWN_ERROR,
+                        "Failed to get ID, SW=" + Integer.toHexString(idResponse.getSW()));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -87,7 +90,7 @@ public class Utils {
         }
     }
 
-    public static Response sendData( byte ins, byte lc, byte[] data) {
+    public static Response sendData(byte ins, byte lc, byte[] data) {
         try {
             TerminalFactory factory = TerminalFactory.getDefault();
             List<CardTerminal> terminals = factory.terminals().list();
@@ -110,7 +113,8 @@ public class Utils {
                 byte[] responseData = responseAPDU.getData();
                 return new Response(Constant.SUCCESS, bytesToHex(responseData));
             } else {
-                return new Response(Constant.UNKNOWN_ERROR, "Failed to send data, SW=" + Integer.toHexString(responseAPDU.getSW()));
+                return new Response(Constant.UNKNOWN_ERROR,
+                        "Failed to send data, SW=" + Integer.toHexString(responseAPDU.getSW()));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -118,22 +122,22 @@ public class Utils {
         }
     }
 
-
     private static String bytesToHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         byte[] var2 = bytes;
         int var3 = bytes.length;
 
-        for(int var4 = 0; var4 < var3; ++var4) {
+        for (int var4 = 0; var4 < var3; ++var4) {
             byte b = var2[var4];
             sb.append(String.format("%02X", b));
         }
 
         return sb.toString();
     }
+
     public static byte[] getBytesFromFile(File file) throws IOException {
         try (FileInputStream fileInputStream = new FileInputStream(file);
-             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
 
             byte[] buffer = new byte[1024];
             int bytesRead;
@@ -144,11 +148,13 @@ public class Utils {
             return byteArrayOutputStream.toByteArray();
         }
     }
+
     public boolean verifySignature(byte[] message, byte[] signature, PublicKey publicKey) throws Exception {
         Signature sig = Signature.getInstance("SHA256withRSA");
         sig.initVerify(publicKey);
         sig.update(message);
         return sig.verify(signature);
     }
+
 
 }

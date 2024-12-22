@@ -7,4 +7,4 @@
 >>>>>>> 1235dde (changeconnect):.gitignore
 # But not these files...
 !.gitignore
-!src/
+!employee-management-system/
