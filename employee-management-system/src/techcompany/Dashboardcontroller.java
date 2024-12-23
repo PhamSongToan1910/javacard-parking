@@ -29,6 +29,10 @@ import techcompany.util.Utils;
 import techcompany.entities.CardInfo;
 import java.io.File;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
@@ -40,7 +44,7 @@ import java.sql.Statement;
 import java.util.ResourceBundle;
 
 
-public class Dashboardcontroller implements Initializable {
+public class Dashboardcontroller  implements Initializable {
 
     @FXML
     public Button changePin_btn;
@@ -124,8 +128,6 @@ public class Dashboardcontroller implements Initializable {
     @FXML
     private Label licensePlateLabel;
     @FXML
-    private Label carBranchLabel;
-    @FXML
     private Label statusLabel;
     @FXML
     private TextField pinInput;
@@ -142,8 +144,10 @@ public class Dashboardcontroller implements Initializable {
     @FXML
     ImageView imgPreview;
 
-    // End khai báo button của phần kết nói
+    @FXML
+    Label balanceLabel;
 
+    // End khai báo button của phần kết nói
     private int incorrectPinAttempts = 0;
     private int MAX_INCORRECT_ATTEMPTS = 5;
     private Connection connect;
@@ -154,7 +158,7 @@ public class Dashboardcontroller implements Initializable {
 
     // Thêm các phần tử liên quan đến chức năng nạp/trừ tiền
     @FXML
-    private Label balanceLabel;
+    private Label brandLabel;
 
     @FXML
     private TextField amountInput;
@@ -167,7 +171,7 @@ public class Dashboardcontroller implements Initializable {
 
     private BalanceService balanceService;
 
-    private int soTien;
+    private String idCard;
 
     public Dashboardcontroller() {
 
@@ -192,7 +196,7 @@ public class Dashboardcontroller implements Initializable {
                 addEmployee_form.setVisible(false);
                 addUser_form.setVisible(true);
                 depDesig_form.setVisible(false);
-
+                getSoDu();
         } else if (event.getSource() == changePin_btn) {
                 home_form.setVisible(false);
                 addEmployee_form.setVisible(false);
@@ -213,16 +217,15 @@ public class Dashboardcontroller implements Initializable {
     }
 
     @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        balanceService = new BalanceService(1000000.0);
-        id_card.setEditable(false);
-        balanceLabel.setText("Số dư: " + balanceService.getBalance() + " đ");
+    public void initialize(URL location, ResourceBundle resources){
+
     }
 
     public void enableCard() {
         Response response = Utils.connectCardAndGetID();
         if(response.errorCode == Constant.SUCCESS) {
             label_show_noti_form_create.setText("Success!!!");
+            idCard = response.getdata();
             id_card.setText(response.data);
         } else {
             label_show_noti_form_create.setText("Error " + response.getErrorCode() + ": " + response.data);
@@ -250,12 +253,15 @@ public class Dashboardcontroller implements Initializable {
             if(response.errorCode == Constant.SUCCESS) {
                 String infor = response.getdata();
                 String[] parts = infor.split("@");
+                idLabel.setText(idCard);
                 licensePlateLabel.setText(parts[0]);
-                carBranchLabel.setText(parts[1]);
+                brandLabel.setText(parts[1]);
                 carModelLabel.setText(parts[2]);
                 carColorLabel.setText(parts[3]);
                 ownerNameLabel.setText(parts[4]);
                 incorrectPinAttempts = 0;
+
+                statusLabel.setText("Đã kết nối thẻ");
                 pinErrorText.setVisible(false);
                 disconnectCardBtn.setDisable(false);
                 editCardInfo.setDisable(false);
@@ -287,6 +293,7 @@ public class Dashboardcontroller implements Initializable {
         disconnectCardBtn.setDisable(true);
         editCardInfo.setDisable(true);
         updateImageBtn.setDisable(true);
+        statusLabel.setText("Xin hãy kết nối thẻ");
     }
 
     @FXML
@@ -310,7 +317,7 @@ public class Dashboardcontroller implements Initializable {
             controller.setDialogStage(dialogStage);
             controller.setData(idLabel.getText(), ownerNameLabel.getText(),
                     carModelLabel.getText(), carColorLabel.getText(),
-                    licensePlateLabel.getText(), balanceLabel.getText());
+                    licensePlateLabel.getText(), brandLabel.getText());
 
             dialogStage.showAndWait();
 
@@ -320,7 +327,7 @@ public class Dashboardcontroller implements Initializable {
 //                carModelLabel.setText(controller.getCarModel());
 //                carColorLabel.setText(controller.getCarColor());
 //                licensePlateLabel.setText(controller.getLicensePlate());
-//                balanceLabel.setText(controller.getBalance());
+//                brandLabel.setText(controller.getBalance());
 
                 CardInfo cardInfo = new CardInfo(
                         controller.getId(),
@@ -328,7 +335,7 @@ public class Dashboardcontroller implements Initializable {
                         controller.getCarModel(),
                         controller.getCarColor(),
                         controller.getLicensePlate(),
-                        controller.getBalance()
+                        controller.getBrand()
                 );
 
 
@@ -395,6 +402,12 @@ public class Dashboardcontroller implements Initializable {
                 choose_image_view.setFitHeight(120);
                 choose_image_view.setPreserveRatio(false);
                 choose_image_view.setSmooth(true);
+                byte ins = (byte) 07;
+                byte lc = (byte) imageByte.length;
+                Response response = Utils.saveAndGetData(ins, lc, imageByte);
+                if(response.errorCode == Constant.SUCCESS) {
+                    System.out.println("Image chosen");
+                }
                 return imageByte;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -405,6 +418,20 @@ public class Dashboardcontroller implements Initializable {
         return null;
     }
 
+    public void getSoDu(){
+        byte ins = (byte) 06;
+        Response response = Utils.getData(ins);
+        String result = response.getdata().replace("@", "");
+        System.out.println("Số dư: " + result);
+        if(result.equals("")) {
+            balanceService.setBalance(0.0);
+            balanceLabel.setText("Số dư: 0.0đ");
+        }
+        else {
+            balanceService.setBalance(Double.parseDouble(response.getdata()));
+            balanceLabel.setText(response.getdata());
+        }
+    }
 
     // Xử lý sự kiện nạp tiền
     @FXML
