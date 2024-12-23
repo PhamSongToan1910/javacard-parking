@@ -8,7 +8,7 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 
-<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="techcompany.Dashboardcontroller">
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/11.0.14-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="techcompany.Dashboardcontroller">
    <children>
       <AnchorPane fx:id="main_form" prefHeight="200.0" prefWidth="200.0">
          <children>
@@ -112,7 +112,7 @@
                                                 <Font name="Arial Bold" size="18.0" />
                                              </font>
                                           </Label>
-                                          <Label alignment="CENTER_RIGHT" layoutX="84.0" layoutY="316.0" text="Số dư:">
+                                          <Label alignment="CENTER_RIGHT" layoutX="84.0" layoutY="316.0" text="Hãng xe:">
                                              <font>
                                                 <Font name="Arial Bold" size="18.0" />
                                              </font>
@@ -191,7 +191,7 @@
                                                 </ImageView>
                                              </children>
                                           </AnchorPane>
-                                          <TextField fx:id="id_card" layoutX="196.0" layoutY="78.0" prefHeight="39.0" prefWidth="161.0" promptText="ID Card" stylesheets="@dashboardDesign.css">
+                                          <TextField fx:id="id_card" disable="true" layoutX="196.0" layoutY="78.0" prefHeight="39.0" prefWidth="161.0" promptText="ID Card" stylesheets="@dashboardDesign.css">
                                              <font>
                                                 <Font size="18.0" />
                                              </font>
@@ -246,8 +246,9 @@
                                     </AnchorPane>
                                  </children>
                               </AnchorPane>
-                           </children></AnchorPane>
-                        <AnchorPane fx:id="addEmployee_form" layoutX="1.0" layoutY="-1.0" prefHeight="555.0" prefWidth="900.0" visible="false">
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane fx:id="addEmployee_form" layoutX="1.0" layoutY="-1.0" prefHeight="555.0" prefWidth="900.0">
                            <children>
                               <AnchorPane layoutX="8.0" layoutY="3.0" prefHeight="559.0" prefWidth="895.0" stylesheets="@dashboardDesign.css" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="7.0" AnchorPane.topAnchor="3.0">
                                  <styleClass>
@@ -272,13 +273,13 @@
                                        </font>
                                     </TextField>
                                     <Button fx:id="connectCardBtn" layoutX="218.0" layoutY="25.0" mnemonicParsing="false" onAction="#handleConnectCard" prefHeight="40.0" prefWidth="100.0" styleClass="add-btn" stylesheets="@dashboardDesign.css" text="Kết nối" />
-                                    <Button fx:id="disconnectCardBtn" layoutX="330.0" layoutY="25.0" mnemonicParsing="false" onAction="#handleDisconnectCard" prefHeight="40.0" prefWidth="100.0" styleClass="update-btn" stylesheets="@dashboardDesign.css" text="Ngắt kết nối" />
-                                    <Label fx:id="pinErrorText" alignment="CENTER_RIGHT" layoutX="32.0" layoutY="72.0" text="Sai mã PIN: Bạn còn 4 lần nhập lại" textFill="#f53535">
+                                    <Button fx:id="disconnectCardBtn" disable="true" layoutX="330.0" layoutY="25.0" mnemonicParsing="false" onAction="#handleDisconnectCard" prefHeight="40.0" prefWidth="100.0" styleClass="update-btn" stylesheets="@dashboardDesign.css" text="Ngắt kết nối" />
+                                    <Label fx:id="pinErrorText" alignment="CENTER_RIGHT" layoutX="32.0" layoutY="72.0" textFill="#f53535">
                                        <font>
                                           <Font name="Arial Bold" size="14.0" />
                                        </font>
                                     </Label>
-                                    <Label fx:id="statusLabel" alignment="CENTER_RIGHT" layoutX="452.0" layoutY="37.0" text="Đã kết nối" textFill="#998aff">
+                                    <Label fx:id="statusLabel" alignment="CENTER_RIGHT" layoutX="452.0" layoutY="37.0" text="Chưa kết nối thẻ" textFill="#998aff">
                                        <font>
                                           <Font name="Arial Bold" size="18.0" />
                                        </font>
@@ -291,7 +292,6 @@
                                     <String fx:value="shadow" />
                                  </styleClass>
                                  <children>
-                                    <Button fx:id="updateImageBtn" layoutX="643.0" layoutY="180.0" mnemonicParsing="false" onAction="#handleEditAvatar" prefHeight="36.0" prefWidth="79.0" styleClass="add-btn" stylesheets="@dashboardDesign.css" text="Sửa" />
                                     <Label alignment="CENTER_RIGHT" layoutX="95.0" layoutY="41.0" text="ID:">
                                        <font>
                                           <Font name="Arial Bold" size="18.0" />
@@ -312,7 +312,7 @@
                                           <Font name="Arial Bold" size="18.0" />
                                        </font>
                                     </Label>
-                                    <Label alignment="CENTER_RIGHT" layoutX="93.0" layoutY="304.0" text="Số dư:">
+                                    <Label alignment="CENTER_RIGHT" layoutX="93.0" layoutY="304.0" text="Hãng xe:">
                                        <font>
                                           <Font name="Arial Bold" size="18.0" />
                                        </font>
@@ -342,7 +342,7 @@
                                           <Font name="Arial" size="18.0" />
                                        </font>
                                     </Label>
-                                    <Label fx:id="carBranchLabel" alignment="CENTER_RIGHT" layoutX="165.0" layoutY="304.0" text="Hãng xe">
+                                    <Label fx:id="brandLabel" alignment="CENTER_RIGHT" layoutX="189.0" layoutY="304.0" text="Hãng xe">
                                        <font>
                                           <Font name="Arial" size="18.0" />
                                        </font>
@@ -352,7 +352,19 @@
                                           <Font name="Arial" size="18.0" />
                                        </font>
                                     </Label>
-                                    <ImageView fx:id="imgPreview" fitHeight="138.0" fitWidth="134.0" layoutX="616.0" layoutY="31.0" pickOnBounds="true" preserveRatio="true" />
+                                    <ImageView fx:id="imgPreview" fitHeight="138.0" fitWidth="134.0" layoutX="320.0" layoutY="155.0" pickOnBounds="true" preserveRatio="true" />
+                                    <Button fx:id="editCardInfo" disable="true" layoutX="596.0" layoutY="305.0" mnemonicParsing="false" onAction="#handleOpenModalEditCardInfo" prefHeight="41.0" prefWidth="127.0" styleClass="add-btn" stylesheets="@dashboardDesign.css" text="Sửa thông tin" />
+                                    <AnchorPane layoutX="366.0" layoutY="24.0" prefHeight="114.0" prefWidth="123.0" />
+                                    <Button fx:id="updateImageBtn" disable="true" layoutX="625.0" layoutY="24.0" mnemonicParsing="false" onAction="#chooseimage" prefHeight="36.0" prefWidth="99.0" styleClass="add-btn" stylesheets="@dashboardDesign.css" text="Thêm ảnh" />
+                                    <AnchorPane layoutX="489.0" layoutY="23.0" prefHeight="116.0" prefWidth="112.0" stylesheets="@dashboardDesign.css">
+                                       <styleClass>
+                                          <String fx:value="white-bg" />
+                                          <String fx:value="shadow" />
+                                       </styleClass>
+                                       <children>
+                                          <ImageView fx:id="choose_image_view1" />
+                                       </children>
+                                    </AnchorPane>
                                  </children>
                               </AnchorPane>
                            </children>
@@ -371,7 +383,7 @@
                                           <String fx:value="shadow" />
                                        </styleClass>
                                        <children>
-                                          <Label fx:id="balanceLabel" alignment="CENTER_RIGHT" layoutX="29.0" layoutY="31.0" text="Số dư: ">
+                                             <Label fx:id="balanceLabel" alignment="CENTER_RIGHT" layoutX="29.0" layoutY="31.0" text="Số dư: ">
                                              <font>
                                                 <Font name="Arial Bold" size="24.0" />
                                              </font>

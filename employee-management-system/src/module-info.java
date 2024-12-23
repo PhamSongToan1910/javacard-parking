@@ -6,4 +6,6 @@ module employee.management.system {
     requires java.desktop;
 
     opens techcompany;
+    opens techcompany.UIcomponent.EditCardInfoModal to javafx.fxml;
+    exports techcompany.UIcomponent.EditCardInfoModal to javafx.fxml;
 }

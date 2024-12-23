@@ -27,7 +27,8 @@ public class TechCompany extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("dashboard.fxml"));
         loader.setControllerFactory(param -> new Dashboardcontroller());
         Parent root = loader.load();
-        
+        Dashboardcontroller dashboardController = loader.getController();
+        dashboardController.setPrimaryStage(stage);
         Scene scene = new Scene(root);
         
         root.setOnMousePressed((MouseEvent event) ->{
