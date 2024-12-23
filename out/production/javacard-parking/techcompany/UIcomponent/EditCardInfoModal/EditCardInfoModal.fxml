@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane
+        xmlns="http://javafx.com/javafx"
+        xmlns:fx="http://javafx.com/fxml"
+        fx:controller="techcompany.UIcomponent.EditCardInfoModal.EditCardInfoController"
+        prefHeight="400.0" prefWidth="600.0">
+    <GridPane layoutX="50.0" layoutY="50.0" hgap="10" vgap="10">
+        <Label text="ID:" GridPane.rowIndex="0" GridPane.columnIndex="0">
+            <font>
+                <Font name="Arial Bold" size="14.0"/>
+            </font>
+        </Label>
+        <TextField fx:id="idField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+        <Label text="Tên chủ xe:" GridPane.rowIndex="1" GridPane.columnIndex="0">
+            <font>
+                <Font name="Arial Bold" size="14.0"/>
+            </font>
+        </Label>
+        <TextField fx:id="ownerNameField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+        <Label text="Mẫu xe:" GridPane.rowIndex="2" GridPane.columnIndex="0">
+            <font>
+                <Font name="Arial Bold" size="14.0"/>
+            </font>
+        </Label>
+        <TextField fx:id="carModelField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        <Label text="Màu Xe:" GridPane.rowIndex="3" GridPane.columnIndex="0">
+            <font>
+                <Font name="Arial Bold" size="14.0"/>
+            </font>
+        </Label>
+        <TextField fx:id="carColorField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+        <Label text="Biển số xe:" GridPane.rowIndex="4" GridPane.columnIndex="0">
+            <font>
+                <Font name="Arial Bold" size="14.0"/>
+            </font>
+        </Label>
+        <TextField fx:id="licensePlateField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+        <Label text="Số dư:" GridPane.rowIndex="5" GridPane.columnIndex="0">
+            <font>
+                <Font name="Arial Bold" size="14.0"/>
+            </font>
+        </Label>
+        <TextField fx:id="balanceField" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+    </GridPane>
+    <Button layoutX="200.0" layoutY="320.0" text="Save" onAction="#handleSave">
+        <font>
+            <Font name="Arial Bold" size="14.0"/>
+        </font>
+    </Button>
+    <Button layoutX="350.0" layoutY="320.0" text="Cancel" onAction="#handleCancel">
+        <font>
+            <Font name="Arial Bold" size="14.0"/>
+        </font>
+    </Button>
+</AnchorPane>

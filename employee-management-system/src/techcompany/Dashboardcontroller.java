@@ -7,27 +7,28 @@ package techcompany;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.paint.Color;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import techcompany.UIcomponent.EditCardInfoModal.EditCardInfoController;
 import techcompany.entities.Car;
 import techcompany.entities.Response;
 import techcompany.service.CarService;
 import techcompany.service.BalanceService;
 import techcompany.util.Constant;
 import techcompany.util.Utils;
-import javafx.stage.FileChooser;
+import techcompany.entities.CardInfo;
 import java.io.File;
-import javafx.scene.image.Image;
 
-import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
@@ -83,6 +84,7 @@ public class Dashboardcontroller implements Initializable {
 
     @FXML
     public Button choose_image;
+    public Button editCardInfo;
 
     @FXML
     private AnchorPane main_form;
@@ -212,6 +214,7 @@ public class Dashboardcontroller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        balanceService = new BalanceService(1000000.0);
         id_card.setEditable(false);
         balanceLabel.setText("Số dư: " + balanceService.getBalance() + " đ");
     }
@@ -229,6 +232,12 @@ public class Dashboardcontroller implements Initializable {
 
 
     //Logic cho tab kết nối
+
+    private Stage primaryStage;
+    public void setPrimaryStage(Stage primaryStage) {
+        this.primaryStage = primaryStage;
+    }
+
     @FXML
     private void handleConnectCard() {
         String pin = pinInput.getText();
@@ -237,6 +246,7 @@ public class Dashboardcontroller implements Initializable {
             byte ins = (byte) 02;
             byte lc = (byte) pinBytes.length;
             Response response = Utils.saveAndGetData(ins, lc, pinBytes);
+            System.out.println("smt" + response.errorCode);
             if(response.errorCode == Constant.SUCCESS) {
                 String infor = response.getdata();
                 String[] parts = infor.split("@");
@@ -245,13 +255,20 @@ public class Dashboardcontroller implements Initializable {
                 carModelLabel.setText(parts[2]);
                 carColorLabel.setText(parts[3]);
                 ownerNameLabel.setText(parts[4]);
+                incorrectPinAttempts = 0;
+                pinErrorText.setVisible(false);
+                disconnectCardBtn.setDisable(false);
+                editCardInfo.setDisable(false);
+                updateImageBtn.setDisable(false);
+                pinErrorText.setText("");
             }
             else {
                 incorrectPinAttempts++;
                 if (incorrectPinAttempts >= MAX_INCORRECT_ATTEMPTS) {
                     connectCardBtn.setDisable(true);
+                    editCardInfo.setDisable(true);
                     pinErrorText.setVisible(true);
-                    pinErrorText.setText("Bạn đã nhập sai mã PIN quá 3 lần. Vui lòng thử lại sau.");
+                    pinErrorText.setText("Bạn đã nhập quá số lần cho phép.");
                 } else {
                     pinErrorText.setVisible(true);
                     int remainingAttempts = MAX_INCORRECT_ATTEMPTS - incorrectPinAttempts;
@@ -267,13 +284,69 @@ public class Dashboardcontroller implements Initializable {
 
     @FXML
     private void handleDisconnectCard() {
-
+        disconnectCardBtn.setDisable(true);
+        editCardInfo.setDisable(true);
+        updateImageBtn.setDisable(true);
     }
 
     @FXML
     private void handleEditAvatar() {
 
     }
+
+    @FXML
+    private void handleOpenModalEditCardInfo() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/techcompany/UIcomponent/EditCardInfoModal/EditCardInfoModal.fxml"));
+            AnchorPane page = loader.load();
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Edit Information");
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(((Stage) main_form.getScene().getWindow()));
+            Scene scene = new Scene(page);
+            dialogStage.setScene(scene);
+
+            EditCardInfoController controller = loader.getController();
+            controller.setDialogStage(dialogStage);
+            controller.setData(idLabel.getText(), ownerNameLabel.getText(),
+                    carModelLabel.getText(), carColorLabel.getText(),
+                    licensePlateLabel.getText(), balanceLabel.getText());
+
+            dialogStage.showAndWait();
+
+            if (controller.isSaveClicked()) {
+//                idLabel.setText(controller.getId());
+//                ownerNameLabel.setText(controller.getOwnerName());
+//                carModelLabel.setText(controller.getCarModel());
+//                carColorLabel.setText(controller.getCarColor());
+//                licensePlateLabel.setText(controller.getLicensePlate());
+//                balanceLabel.setText(controller.getBalance());
+
+                CardInfo cardInfo = new CardInfo(
+                        controller.getId(),
+                        controller.getOwnerName(),
+                        controller.getCarModel(),
+                        controller.getCarColor(),
+                        controller.getLicensePlate(),
+                        controller.getBalance()
+                );
+
+
+                // Update the XML file with the new data
+                handleUpdateCardInfo(cardInfo);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleUpdateCardInfo(CardInfo cardInfo) {
+        // Log the data
+        System.out.println("Saved data:");
+        System.out.println("cardInfo: " + cardInfo);
+    }
+
+
 
 
     // Helper method to validate PIN code
