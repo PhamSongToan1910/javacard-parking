@@ -27,6 +27,9 @@ import javafx.stage.FileChooser;
 import java.io.File;
 import javafx.scene.image.Image;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -39,7 +42,7 @@ import java.sql.Statement;
 import java.util.ResourceBundle;
 
 
-public class Dashboardcontroller implements Initializable {
+public class Dashboardcontroller  implements Initializable {
 
     @FXML
     public Button changePin_btn;
@@ -165,8 +168,10 @@ public class Dashboardcontroller implements Initializable {
 
     private BalanceService balanceService;
 
+    private String idCard;
+
     public Dashboardcontroller() {
-        balanceService = new BalanceService(0.0);
+        this.balanceService = new BalanceService();
     }
 
 
@@ -188,7 +193,7 @@ public class Dashboardcontroller implements Initializable {
                 addEmployee_form.setVisible(false);
                 addUser_form.setVisible(true);
                 depDesig_form.setVisible(false);
-
+                getSoDu();
         } else if (event.getSource() == changePin_btn) {
                 home_form.setVisible(false);
                 addEmployee_form.setVisible(false);
@@ -217,6 +222,7 @@ public class Dashboardcontroller implements Initializable {
         Response response = Utils.connectCardAndGetID();
         if(response.errorCode == Constant.SUCCESS) {
             label_show_noti_form_create.setText("Success!!!");
+            idCard = response.getdata();
             id_card.setText(response.data);
         } else {
             label_show_noti_form_create.setText("Error " + response.getErrorCode() + ": " + response.data);
@@ -237,6 +243,7 @@ public class Dashboardcontroller implements Initializable {
             if(response.errorCode == Constant.SUCCESS) {
                 String infor = response.getdata();
                 String[] parts = infor.split("@");
+                id_card.setText(idCard);
                 licensePlateLabel.setText(parts[0]);
                 carBranchLabel.setText(parts[1]);
                 carModelLabel.setText(parts[2]);
@@ -319,6 +326,12 @@ public class Dashboardcontroller implements Initializable {
                 choose_image_view.setFitHeight(120);
                 choose_image_view.setPreserveRatio(false);
                 choose_image_view.setSmooth(true);
+                byte ins = (byte) 07;
+                byte lc = (byte) imageByte.length;
+                Response response = Utils.saveAndGetData(ins, lc, imageByte);
+                if(response.errorCode == Constant.SUCCESS) {
+                    System.out.println("Image chosen");
+                }
                 return imageByte;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -329,19 +342,35 @@ public class Dashboardcontroller implements Initializable {
         return null;
     }
 
+    public void getSoDu() {
+        byte ins = (byte) 06;
+        Response response = Utils.getData(ins);
+        String result = response.getdata().replace("@", "");
+        System.out.println("Số dư: " + result);
+        if(result.equals("")) {
+            balanceService.setBalance(0.0);
+            balanceLabel.setText("Số dư: 0.0đ");
+        }
+        else {
+            balanceService.setBalance(Double.parseDouble(response.getdata())*1000.0);
+            balanceLabel.setText(response.getdata());
+        }
+    }
 
     // Xử lý sự kiện nạp tiền
     @FXML
     public void handleDeposit(ActionEvent event) {
-        try {
             double amount = Double.parseDouble(amountInput.getText());
-            String message = balanceService.deposit(amount);
-            balanceLabel.setText("Số dư: " + balanceService.getBalance() + " đ");
-            amountInput.clear();
-            label_show_noti_form_balance.setText(message);
-        } catch (NumberFormatException e) {
-            label_show_noti_form_balance.setText("Vui lòng nhập số tiền hợp lệ!");
-        }
+            String sodu = balanceService.deposit(amount, balanceService);
+            if(sodu == "Vui lòng nhập lại")
+                label_show_noti_form_balance.setText("Vui lòng nhập lại số tiền");
+            else {
+                String result = sodu.replaceAll("[^0-9.]", "");
+                label_show_noti_form_balance.setText("Success!!!");
+                System.out.println("số dư: " + sodu);
+                balanceLabel.setText("Số dư: " + (Integer.parseInt(result)*1000) + " đ");
+                amountInput.clear();
+            }
     }
 
     // Xử lý sự kiện trừ tiền

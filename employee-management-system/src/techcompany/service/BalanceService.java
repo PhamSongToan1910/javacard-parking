@@ -1,8 +1,18 @@
 package techcompany.service;
 
+import techcompany.entities.Response;
+import techcompany.util.Constant;
+import techcompany.util.Utils;
+
+import java.nio.ByteBuffer;
+
 public class BalanceService {
 
     private double balance;
+
+    public BalanceService() {
+
+    }
 
     // Constructor to initialize balance
     public BalanceService(double initialBalance) {
@@ -19,12 +29,17 @@ public class BalanceService {
     }
 
     // Method to deposit money
-    public String deposit(double amount) {
+    public String deposit(double amount, BalanceService balanceService) {
         if (amount <= 0) {
-            return "Số tiền nạp phải lớn hơn 0.";
+            return "Vui lòng nhập lại";
         }
-        balance += amount;
-        return "Nạp tiền thành công. Số dư hiện tại: " + balance + " đ";
+        balance = balanceService.getBalance() + amount;
+        byte[] bytes = ByteBuffer.allocate(4).putInt((int)balance).array();
+        Response response = Utils.saveAndGetData((byte) 0x05, (byte) 01, bytes);
+        if(response.errorCode == Constant.SUCCESS) {
+            return response.getdata();
+        }
+        return "lỗi không kết nối được với thẻ";
     }
 
     // Method to withdraw money
