@@ -174,7 +174,44 @@ public class Utils {
         }
     }
 
+    public static Response getMonney(byte ins) {
+        try {
+            if (cardChannel == null) {
+                return new Response(Constant.UNKNOWN_ERROR, "No card channel available!");
+            }
 
+            CommandAPDU commandAPDU = new CommandAPDU(0x00, ins, 0x00, 0x00);
+            ResponseAPDU responseAPDU = cardChannel.transmit(commandAPDU);
+
+            if (responseAPDU.getSW() == 0x9000) {
+                byte[] responseData = responseAPDU.getData();
+                String hexString = bytesToHex(responseData);
+                String responseDataString = hexToString(hexString);
+
+                if (responseData.length >= 4) {
+                    byte[] check = Arrays.copyOfRange(responseData,0,1);
+                    System.out.println(check[0]);
+                    int balance;
+                    if(check[0] == 64){
+                        balance = 0;
+                    }
+                    else{
+                        byte[] balanceBytes = Arrays.copyOfRange(responseData, 0, 4); // Lấy 4 byte đầu (số dư)
+                        balance = ByteBuffer.wrap(balanceBytes).getInt(); // Chuyển 4 byte thành số nguyên
+                    }
+                    return new Response(Constant.SUCCESS, String.valueOf(balance));
+                } else {
+                    return new Response(Constant.UNKNOWN_ERROR, "Invalid response data length.");
+                }
+            } else {
+                return new Response(Constant.UNKNOWN_ERROR,
+                        "Failed to send data, SW=" + Integer.toHexString(responseAPDU.getSW()));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Response(Constant.UNKNOWN_ERROR, "Exception during SEND DATA: " + e.getMessage());
+        }
+    }
 
     private static String bytesToHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
