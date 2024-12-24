@@ -36,7 +36,7 @@
             </font>
         </Label>
         <TextField fx:id="licensePlateField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-        <Label text="Số dư:" GridPane.columnIndex="0" GridPane.rowIndex="5">
+        <Label text="Hãng xe:" GridPane.columnIndex="0" GridPane.rowIndex="5">
             <font>
                 <Font name="Arial Bold" size="14.0" />
             </font>
