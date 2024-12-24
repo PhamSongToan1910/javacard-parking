@@ -10,9 +10,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -113,6 +111,18 @@ public class Dashboardcontroller implements Initializable {
     @FXML
     private AnchorPane depDesig_form;
 
+    // Change PIN section
+    @FXML
+    private PasswordField oldPinField;
+    @FXML
+    private PasswordField newPinField;
+    @FXML
+    private PasswordField confirmPinField;
+    @FXML
+    private Label errorLabel;
+    @FXML
+    private Button getChangePin_btn;
+
     // Start khai báo button của phần kết nối
     @FXML
     private Label pinErrorText;
@@ -200,8 +210,10 @@ public class Dashboardcontroller implements Initializable {
             addEmployee_form.setVisible(false);
             addUser_form.setVisible(false);
             depDesig_form.setVisible(true);
+
         }
     }
+
 
     public void close() {
         System.exit(0);
@@ -244,7 +256,6 @@ public class Dashboardcontroller implements Initializable {
             byte ins = (byte) 02;
             byte lc = (byte) pinBytes.length;
             Response response = Utils.saveAndGetData(ins, lc, pinBytes);
-            System.out.println("smt" + response.errorCode);
             if (response.errorCode == Constant.SUCCESS) {
                 String infor = response.getdata();
                 String[] parts = infor.split("@");
@@ -254,8 +265,8 @@ public class Dashboardcontroller implements Initializable {
                 carModelLabel.setText(parts[2]);
                 carColorLabel.setText(parts[3]);
                 ownerNameLabel.setText(parts[4]);
-                incorrectPinAttempts = 0;
 
+                incorrectPinAttempts = 0;
                 statusLabel.setText("Đã kết nối thẻ");
                 pinErrorText.setVisible(false);
                 disconnectCardBtn.setDisable(false);
@@ -271,6 +282,8 @@ public class Dashboardcontroller implements Initializable {
                     pinErrorText.setText("Bạn đã nhập quá số lần cho phép.");
                 } else {
                     pinErrorText.setVisible(true);
+                    connectCardBtn.setDisable(true);
+                    editCardInfo.setDisable(true);
                     int remainingAttempts = MAX_INCORRECT_ATTEMPTS - incorrectPinAttempts;
                     pinErrorText.setText("Sai mã PIN: Bạn còn " + remainingAttempts + " lần nhập lại");
                 }
@@ -324,6 +337,7 @@ public class Dashboardcontroller implements Initializable {
                         controller.getCarColor(),
                         controller.getLicensePlate(),
                         controller.getBrand());
+
                 StringBuilder carInfor = new StringBuilder(controller.getLicensePlate()+"@"+controller.getBrand());
                 carInfor.append("@"+controller.getCarModel()+ "@"+ controller.getCarColor()+ "@"+ controller.getOwnerName() );
 
@@ -332,19 +346,31 @@ public class Dashboardcontroller implements Initializable {
                 byte lc = (byte) bytes.length;
                 Response response = Utils.saveAndGetData(ins, lc, bytes);
                 if (response.errorCode == Constant.SUCCESS) {
-                    // cho một cái text để thông báo thành công ở đaây a nhé
+                    idLabel.setText(controller.getId());
+                    licensePlateLabel.setText(controller.getLicensePlate());
+                    brandLabel.setText(controller.getBrand());
+                    carModelLabel.setText(controller.getCarModel());
+                    carColorLabel.setText(controller.getCarColor());
+                    ownerNameLabel.setText(controller.getOwnerName());
+
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("Thành công");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Sửa thông tin thành công");
+                    alert.showAndWait();
+
+
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Lỗi");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Lỗi chưa lưu được thông tin");
+                    alert.showAndWait();
                 }
-                handleUpdateCardInfo(cardInfo);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private void handleUpdateCardInfo(CardInfo cardInfo) {
-        // Log the data
-        System.out.println("Saved data:");
-        System.out.println("cardInfo: " + cardInfo);
     }
 
     // Helper method to validate PIN code
@@ -462,5 +488,47 @@ public class Dashboardcontroller implements Initializable {
             label_show_noti_form_balance.setText("Vui lòng nhập số tiền hợp lệ!");
         }
     }
+
+    //Xử lý chức năng đổi mã PIN
+    @FXML
+    private void handleConfirmButton() {
+        String oldPin = oldPinField.getText();
+        String newPin = newPinField.getText();
+        String confirmPin = confirmPinField.getText();
+
+
+        try {
+            if (newPin.equals(oldPin)) {
+                errorLabel.setText("Mã PIN mới không được trùng với Mã PIN cũ!");
+                return;
+            }
+
+
+            if (!newPin.equals(confirmPin)) {
+                errorLabel.setText("Mã PIN mới không khớp!");
+                return;
+            }
+
+
+            boolean isOldPinCorrect = checkOldPin(oldPin);
+
+            if (!isOldPinCorrect) {
+                errorLabel.setText("Trùng mã PIN cũ");
+            }
+//        else {
+//
+//          DIỄM TỰ XỬ NỐT Ở ĐÂU NHA
+
+//        }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private boolean checkOldPin(String oldPin) {
+
+        return true;
+    };
 
 }

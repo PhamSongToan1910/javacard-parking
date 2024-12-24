@@ -78,7 +78,7 @@
                <center>
                   <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                      <children>
-                        <AnchorPane fx:id="home_form" layoutX="5.0" prefHeight="555.0" prefWidth="900.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="0.0">
+                        <AnchorPane fx:id="home_form" layoutX="5.0" prefHeight="555.0" prefWidth="900.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="0.0">
                            <children>
                               <AnchorPane layoutX="8.0" layoutY="6.0" prefHeight="559.0" prefWidth="895.0" stylesheets="@dashboardDesign.css" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="1.0">
                                  <styleClass>
@@ -248,7 +248,7 @@
                               </AnchorPane>
                            </children>
                         </AnchorPane>
-                        <AnchorPane fx:id="addEmployee_form" layoutX="1.0" layoutY="-1.0" prefHeight="555.0" prefWidth="900.0">
+                        <AnchorPane fx:id="addEmployee_form" layoutX="1.0" layoutY="-1.0" prefHeight="555.0" prefWidth="900.0" visible="false">
                            <children>
                               <AnchorPane layoutX="8.0" layoutY="3.0" prefHeight="559.0" prefWidth="895.0" stylesheets="@dashboardDesign.css" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="7.0" AnchorPane.topAnchor="3.0">
                                  <styleClass>
@@ -419,7 +419,7 @@
                               </AnchorPane>
                            </children>
                         </AnchorPane>
-                        <AnchorPane fx:id="depDesig_form" prefHeight="555.0" prefWidth="900.0" visible="false">
+                        <AnchorPane fx:id="depDesig_form" prefHeight="555.0" prefWidth="900.0">
                            <children>
                               <AnchorPane layoutX="8.0" layoutY="3.0" prefHeight="559.0" prefWidth="895.0" stylesheets="@dashboardDesign.css" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="7.0" AnchorPane.topAnchor="3.0">
                                  <styleClass>
@@ -448,32 +448,20 @@
                                                 <Font name="Arial Bold" size="18.0" />
                                              </font>
                                           </Label>
-                                          <TextField fx:id="addEmployee_employeeID11111" layoutX="219.0" layoutY="123.0" prefHeight="39.0" prefWidth="484.0" promptText="Input mã PIN" stylesheets="@dashboardDesign.css">
-                                             <font>
-                                                <Font size="18.0" />
-                                             </font>
-                                          </TextField>
-                                          <TextField fx:id="addEmployee_employeeID111111" layoutX="219.0" layoutY="208.0" prefHeight="39.0" prefWidth="483.0" promptText="Input mã PIN" stylesheets="@dashboardDesign.css">
-                                             <font>
-                                                <Font size="18.0" />
-                                             </font>
-                                          </TextField>
-                                          <TextField fx:id="addEmployee_employeeID111121" layoutX="219.0" layoutY="293.0" prefHeight="39.0" prefWidth="487.0" promptText="Input mã PIN" stylesheets="@dashboardDesign.css">
-                                             <font>
-                                                <Font size="18.0" />
-                                             </font>
-                                          </TextField>
-                                          <Button fx:id="addEmployee_add_btn11311" layoutX="625.0" layoutY="378.0" mnemonicParsing="false" prefHeight="36.0" prefWidth="79.0" styleClass="add-btn" stylesheets="@dashboardDesign.css" text="Xác nhận" />
+                                          <Button fx:id="getChangePin_btn" layoutX="625.0" layoutY="378.0" mnemonicParsing="false" onAction="#handleConfirmButton" prefHeight="36.0" prefWidth="79.0" styleClass="add-btn" stylesheets="@dashboardDesign.css" text="Xác nhận" />
                                           <Label alignment="CENTER_RIGHT" layoutX="57.0" layoutY="59.0" text="Thay đổi mã PIN">
                                              <font>
                                                 <Font name="Arial Bold" size="24.0" />
                                              </font>
                                           </Label>
-                                          <Label alignment="CENTER_RIGHT" layoutX="219.0" layoutY="341.0" text="Báo lỗi nếu không đúng" textFill="#ff6a6a">
+                                          <Label fx:id="errorLabel" alignment="CENTER_RIGHT" layoutX="219.0" layoutY="346.0" textFill="#ff6a6a">
                                              <font>
-                                                <Font name="Arial Bold" size="18.0" />
+                                                <Font name="Arial Bold" size="14.0" />
                                              </font>
                                           </Label>
+                                          <PasswordField fx:id="oldPinField" layoutX="219.0" layoutY="120.0" prefHeight="46.0" prefWidth="485.0" promptText="Nhập mã PIN cũ" />
+                                          <PasswordField fx:id="newPinField" layoutX="219.0" layoutY="205.0" prefHeight="46.0" prefWidth="485.0" promptText="Nhập mã PIN mới" />
+                                          <PasswordField fx:id="confirmPinField" layoutX="219.0" layoutY="290.0" prefHeight="46.0" prefWidth="485.0" promptText="Nhập lại mã PIN" />
                                        </children>
                                     </AnchorPane>
                                  </children>
