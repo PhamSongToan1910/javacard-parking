@@ -36,6 +36,7 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -413,10 +414,10 @@ public class Dashboardcontroller implements Initializable {
         String result = response.getdata().replace("@", "");
         System.out.println("Số dư: " + result);
         if (result.equals("")) {
-            balanceService.setBalance(0.0);
-            balanceLabel.setText("Số dư: 0.0đ");
+            balanceService.setBalance(0);
+            balanceLabel.setText("Số dư: 0");
         } else {
-            balanceService.setBalance(Double.parseDouble(response.getdata()) * 1000.0);
+            balanceService.setBalance(Integer.parseInt(response.getdata()) * 1000);
             balanceLabel.setText(response.getdata());
         }
     }
@@ -424,17 +425,28 @@ public class Dashboardcontroller implements Initializable {
     // Xử lý sự kiện nạp tiền
     @FXML
     public void handleDeposit(ActionEvent event) {
-        double amount = Double.parseDouble(amountInput.getText());
-        String sodu = balanceService.deposit(amount, balanceService);
-        if (sodu == "Vui lòng nhập lại")
-            label_show_noti_form_balance.setText("Vui lòng nhập lại số tiền");
-        else {
-            String result = sodu.replaceAll("[^0-9.]", "");
-            label_show_noti_form_balance.setText("Success!!!");
-            System.out.println("số dư: " + sodu);
-            balanceLabel.setText("Số dư: " + (Integer.parseInt(result) * 1000) + " đ");
-            amountInput.clear();
+        label_show_noti_form_balance.setText("Vui lòng nhập bội của 10.000");
+        int amount = Integer.parseInt(amountInput.getText());
+        if(amount <= 0 && amount % 10000 != 0){
+            label_show_noti_form_balance.setText("Vui lòng nhập lại số tiền. Số tiền là bội của 10.000VND");
         }
+        else {
+            int input;
+            input = (amount + balanceService.getBalance())/10000;
+            byte[] bytes = ByteBuffer.allocate(4).putInt(input).array();
+
+            System.out.println(bytes[0]);
+        }
+//        String sodu = balanceService.deposit(amount, balanceService);
+//        if (sodu == "Vui lòng nhập lại")
+//            label_show_noti_form_balance.setText("Vui lòng nhập lại số tiền");
+//        else {
+//            String result = sodu.replaceAll("[^0-9.]", "");
+//            label_show_noti_form_balance.setText("Success!!!");
+//            System.out.println("số dư: " + sodu);
+//            balanceLabel.setText("Số dư: " + (Integer.parseInt(result) * 1000) + " đ");
+//            amountInput.clear();
+//        }
     }
 
     // Xử lý sự kiện trừ tiền

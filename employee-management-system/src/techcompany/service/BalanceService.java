@@ -8,28 +8,28 @@ import java.nio.ByteBuffer;
 
 public class BalanceService {
 
-    private double balance;
+    private int balance;
 
     public BalanceService() {
 
     }
 
     // Constructor to initialize balance
-    public BalanceService(double initialBalance) {
+    public BalanceService(int initialBalance) {
         this.balance = initialBalance;
     }
 
-    public void setBalance(double balance) {
+    public void setBalance(int balance) {
         this.balance = balance;
     }
 
     // Method to get the current balance
-    public double getBalance() {
+    public int getBalance() {
         return balance;
     }
 
     // Method to deposit money
-    public String deposit(double amount, BalanceService balanceService) {
+    public String deposit(int amount, BalanceService balanceService) {
         if (amount <= 0) {
             return "Vui lòng nhập lại";
         }
