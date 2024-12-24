@@ -7,7 +7,9 @@ package techcompany;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -15,25 +17,32 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import techcompany.UIcomponent.EditCardInfoModal.EditCardInfoController;
 import techcompany.entities.Car;
 import techcompany.entities.Response;
 import techcompany.service.CarService;
 import techcompany.service.BalanceService;
 import techcompany.util.Constant;
 import techcompany.util.Utils;
+import techcompany.entities.CardInfo;
+import java.io.File;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ResourceBundle;
-
 
 public class Dashboardcontroller implements Initializable {
 
@@ -48,7 +57,6 @@ public class Dashboardcontroller implements Initializable {
 
     @FXML
     public Label label_show_noti_form_balance;
-
 
     @FXML
     public TextField id_card;
@@ -79,6 +87,7 @@ public class Dashboardcontroller implements Initializable {
 
     @FXML
     public Button choose_image;
+    public Button editCardInfo;
 
     @FXML
     private AnchorPane main_form;
@@ -94,7 +103,7 @@ public class Dashboardcontroller implements Initializable {
 
     @FXML
     private AnchorPane addEmployee_form;
- 
+
     @FXML
     private Button addUser_btn;
 
@@ -104,6 +113,42 @@ public class Dashboardcontroller implements Initializable {
     @FXML
     private AnchorPane depDesig_form;
 
+    // Start khai báo button của phần kết nối
+    @FXML
+    private Label pinErrorText;
+    @FXML
+    private Label idLabel;
+    @FXML
+    private Label ownerNameLabel;
+    @FXML
+    private Label carModelLabel;
+    @FXML
+    private Label carColorLabel;
+    @FXML
+    private Label licensePlateLabel;
+    @FXML
+    private Label statusLabel;
+    @FXML
+    private TextField pinInput;
+
+    @FXML
+    private Button disconnectCardBtn;
+
+    @FXML
+    private Button connectCardBtn;
+
+    @FXML
+    private Button updateImageBtn;
+
+    @FXML
+    ImageView imgPreview;
+
+    @FXML
+    Label balanceLabel;
+
+    // End khai báo button của phần kết nói
+    private int incorrectPinAttempts = 0;
+    private int MAX_INCORRECT_ATTEMPTS = 5;
     private Connection connect;
     private Statement statement;
     private PreparedStatement prepare;
@@ -112,7 +157,7 @@ public class Dashboardcontroller implements Initializable {
 
     // Thêm các phần tử liên quan đến chức năng nạp/trừ tiền
     @FXML
-    private Label balanceLabel;
+    private Label brandLabel;
 
     @FXML
     private TextField amountInput;
@@ -125,11 +170,11 @@ public class Dashboardcontroller implements Initializable {
 
     private BalanceService balanceService;
 
-    public Dashboardcontroller() {
-        // Khởi tạo số dư ban đầu (giả sử là 1 triệu đồng)
-        balanceService = new BalanceService(1000000);
-    }
+    private String idCard;
 
+    public Dashboardcontroller() {
+        this.balanceService = new BalanceService();
+    }
 
     public void switchForm(ActionEvent event) {
         if (event.getSource() == home_btn) {
@@ -140,25 +185,23 @@ public class Dashboardcontroller implements Initializable {
             depDesig_form.setVisible(false);
 
         } else if (event.getSource() == addEmployee_btn) {
-                home_form.setVisible(false);
-                addEmployee_form.setVisible(true);
-                addUser_form.setVisible(false);
-                depDesig_form.setVisible(false);
+            home_form.setVisible(false);
+            addEmployee_form.setVisible(true);
+            addUser_form.setVisible(false);
+            depDesig_form.setVisible(false);
         } else if (event.getSource() == addUser_btn) {
-                home_form.setVisible(false);
-                addEmployee_form.setVisible(false);
-                addUser_form.setVisible(true);
-                depDesig_form.setVisible(false);
-
+            home_form.setVisible(false);
+            addEmployee_form.setVisible(false);
+            addUser_form.setVisible(true);
+            depDesig_form.setVisible(false);
+            getSoDu();
         } else if (event.getSource() == changePin_btn) {
-                home_form.setVisible(false);
-                addEmployee_form.setVisible(false);
-                addUser_form.setVisible(false);
-                depDesig_form.setVisible(true);
+            home_form.setVisible(false);
+            addEmployee_form.setVisible(false);
+            addUser_form.setVisible(false);
+            depDesig_form.setVisible(true);
         }
     }
-
-
 
     public void close() {
         System.exit(0);
@@ -171,18 +214,152 @@ public class Dashboardcontroller implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        id_card.setEditable(false);
-        balanceLabel.setText("Số dư: " + balanceService.getBalance() + " đ");
+
     }
 
     public void enableCard() {
         Response response = Utils.connectCardAndGetID();
-        if(response.errorCode == Constant.SUCCESS) {
+        if (response.errorCode == Constant.SUCCESS) {
             label_show_noti_form_create.setText("Success!!!");
+            idCard = response.getdata();
             id_card.setText(response.data);
         } else {
             label_show_noti_form_create.setText("Error " + response.getErrorCode() + ": " + response.data);
         }
+    }
+
+    // Logic cho tab kết nối
+
+    private Stage primaryStage;
+
+    public void setPrimaryStage(Stage primaryStage) {
+        this.primaryStage = primaryStage;
+    }
+
+    @FXML
+    private void handleConnectCard() {
+        String pin = pinInput.getText();
+        if (isValidPin(pin)) {
+            byte[] pinBytes = pin.getBytes(StandardCharsets.UTF_8);
+            byte ins = (byte) 02;
+            byte lc = (byte) pinBytes.length;
+            Response response = Utils.saveAndGetData(ins, lc, pinBytes);
+            System.out.println("smt" + response.errorCode);
+            if (response.errorCode == Constant.SUCCESS) {
+                String infor = response.getdata();
+                String[] parts = infor.split("@");
+                idLabel.setText(idCard);
+                licensePlateLabel.setText(parts[0]);
+                brandLabel.setText(parts[1]);
+                carModelLabel.setText(parts[2]);
+                carColorLabel.setText(parts[3]);
+                ownerNameLabel.setText(parts[4]);
+                incorrectPinAttempts = 0;
+
+                statusLabel.setText("Đã kết nối thẻ");
+                pinErrorText.setVisible(false);
+                disconnectCardBtn.setDisable(false);
+                editCardInfo.setDisable(false);
+                updateImageBtn.setDisable(false);
+                pinErrorText.setText("");
+            } else {
+                incorrectPinAttempts++;
+                if (incorrectPinAttempts >= MAX_INCORRECT_ATTEMPTS) {
+                    connectCardBtn.setDisable(true);
+                    editCardInfo.setDisable(true);
+                    pinErrorText.setVisible(true);
+                    pinErrorText.setText("Bạn đã nhập quá số lần cho phép.");
+                } else {
+                    pinErrorText.setVisible(true);
+                    int remainingAttempts = MAX_INCORRECT_ATTEMPTS - incorrectPinAttempts;
+                    pinErrorText.setText("Sai mã PIN: Bạn còn " + remainingAttempts + " lần nhập lại");
+                }
+            }
+        } else {
+            // Display an error message for invalid PIN
+            pinErrorText.setVisible(true);
+            pinErrorText.setText("Invalid PIN. Please enter a valid PIN.");
+        }
+    }
+
+    @FXML
+    private void handleDisconnectCard() {
+        int input = (balanceService.getBalance() - 10000) / 10000;
+        byte[] bytes = ByteBuffer.allocate(4).putInt(input).array();
+
+        Response response = Utils.saveAndGetMonney((byte) 0x05, (byte) 0x00, bytes);
+
+        if (response.errorCode == Constant.SUCCESS) {
+            disconnectCardBtn.setDisable(true);
+            editCardInfo.setDisable(true);
+            updateImageBtn.setDisable(true);
+            statusLabel.setText("Xin hãy kết nối thẻ");
+        } else {
+            label_show_noti_form_balance.setText("Lỗi khi xử lý giao dịch.");
+        }
+
+    }
+
+    @FXML
+    private void handleEditAvatar() {
+
+    }
+
+    @FXML
+    private void handleOpenModalEditCardInfo() {
+        try {
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/techcompany/UIcomponent/EditCardInfoModal/EditCardInfoModal.fxml"));
+            AnchorPane page = loader.load();
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Edit Information");
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            dialogStage.initOwner(((Stage) main_form.getScene().getWindow()));
+            Scene scene = new Scene(page);
+            dialogStage.setScene(scene);
+
+            EditCardInfoController controller = loader.getController();
+            controller.setDialogStage(dialogStage);
+            controller.setData(idLabel.getText(), ownerNameLabel.getText(),
+                    carModelLabel.getText(), carColorLabel.getText(),
+                    licensePlateLabel.getText(), brandLabel.getText());
+
+            dialogStage.showAndWait();
+
+            if (controller.isSaveClicked()) {
+                CardInfo cardInfo = new CardInfo(
+                        controller.getId(),
+                        controller.getOwnerName(),
+                        controller.getCarModel(),
+                        controller.getCarColor(),
+                        controller.getLicensePlate(),
+                        controller.getBrand());
+                StringBuilder carInfor = new StringBuilder(controller.getLicensePlate()+"@"+controller.getBrand());
+                carInfor.append("@"+controller.getCarModel()+ "@"+ controller.getCarColor()+ "@"+ controller.getOwnerName() );
+
+                byte[] bytes = carInfor.toString().getBytes(StandardCharsets.UTF_8);
+                byte ins = (byte) 8;
+                byte lc = (byte) bytes.length;
+                Response response = Utils.saveAndGetData(ins, lc, bytes);
+                if (response.errorCode == Constant.SUCCESS) {
+                    // cho một cái text để thông báo thành công ở đaây a nhé
+                }
+                handleUpdateCardInfo(cardInfo);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void handleUpdateCardInfo(CardInfo cardInfo) {
+        // Log the data
+        System.out.println("Saved data:");
+        System.out.println("cardInfo: " + cardInfo);
+    }
+
+    // Helper method to validate PIN code
+    private boolean isValidPin(String pin) {
+        return pin != null && !pin.isEmpty();
     }
 
     public void createCar() {
@@ -196,12 +373,12 @@ public class Dashboardcontroller implements Initializable {
         Car car = new Car(OwnerCar, modelCar, typeOfCar, colorCar, numberOfCar, pinCode);
         String carStr = car.toString();
         byte[] bytes = carStr.getBytes(StandardCharsets.UTF_8);
-        byte ins = (byte) 00;
+        byte ins = (byte) 01;
         byte lc = (byte) bytes.length;
-        Response response = Utils.sendData(ins, lc, bytes);
-        if(response.errorCode == Constant.SUCCESS) {
+        Response response = Utils.saveAndGetData(ins, lc, bytes);
+        if (response.errorCode == Constant.SUCCESS) {
             pinCode = "";
-            String publicKey = "";
+            String publicKey = response.getdata();
             BigDecimal balance = new BigDecimal("1000000.00");
             car.setBalance(balance);
             car.setPin(pinCode);
@@ -214,8 +391,7 @@ public class Dashboardcontroller implements Initializable {
     public byte[] chooseimage() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif")
-        );
+                new FileChooser.ExtensionFilter("Image Files", "*.png", "*.jpg", "*.jpeg", "*.gif"));
 
         File selectedFile = fileChooser.showOpenDialog(new Stage());
         if (selectedFile != null) {
@@ -227,6 +403,12 @@ public class Dashboardcontroller implements Initializable {
                 choose_image_view.setFitHeight(120);
                 choose_image_view.setPreserveRatio(false);
                 choose_image_view.setSmooth(true);
+                byte ins = (byte) 07;
+                byte lc = (byte) imageByte.length;
+                Response response = Utils.saveAndGetData(ins, lc, imageByte);
+                if (response.errorCode == Constant.SUCCESS) {
+                    System.out.println("Image chosen");
+                }
                 return imageByte;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -237,20 +419,46 @@ public class Dashboardcontroller implements Initializable {
         return null;
     }
 
+    public void getSoDu() {
+        byte ins = (byte) 06;
+        Response response = Utils.getMonney(ins);
+        String result = response.getdata().replace("@", "");
+        System.out.println("Số dư: " + result);
+        if (result.equals("")) {
+            balanceService.setBalance(0);
+            balanceLabel.setText("Số dư: 0đ");
+        } else {
+            balanceService.setBalance(Integer.parseInt(response.getdata()) * 10000);
+            balanceLabel.setText("Số dư: " + (Integer.parseInt(result) * 10000) + " đ");
+            amountInput.setText("");
+        }
+        label_show_noti_form_balance.setText("Vui lòng nhập bội của 10.000");
+    }
 
     // Xử lý sự kiện nạp tiền
     @FXML
     public void handleDeposit(ActionEvent event) {
-        try {
-            double amount = Double.parseDouble(amountInput.getText());
-            String message = balanceService.deposit(amount);
-            balanceLabel.setText("Số dư: " + balanceService.getBalance() + " đ");
-            amountInput.clear();
-            label_show_noti_form_balance.setText(message);
-        } catch (NumberFormatException e) {
-            label_show_noti_form_balance.setText("Vui lòng nhập số tiền hợp lệ!");
+        int amount = Integer.parseInt(amountInput.getText().trim());
+        if (amount <= 0 || amount % 10000 != 0) {
+            label_show_noti_form_balance.setText("Vui lòng nhập lại số tiền. Số tiền phải là bội của 10.000 VND.");
+        } else {
+            int input = (amount + balanceService.getBalance()) / 10000;
+            byte[] bytes = ByteBuffer.allocate(4).putInt(input).array();
+
+            Response response = Utils.saveAndGetMonney((byte) 0x05, (byte) 0x00, bytes);
+
+            if (response.errorCode == Constant.SUCCESS) {
+                String result = response.getdata();
+
+                balanceService.setBalance(Integer.parseInt(result) * 10000);
+                balanceLabel.setText("Số dư: " + (Integer.parseInt(result) * 10000) + " đ");
+            } else {
+                // Hiển thị lỗi nếu có
+                label_show_noti_form_balance.setText("Lỗi khi xử lý giao dịch.");
+            }
         }
     }
+
 
     // Xử lý sự kiện trừ tiền
     @FXML
