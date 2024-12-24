@@ -317,13 +317,6 @@ public class Dashboardcontroller implements Initializable {
             dialogStage.showAndWait();
 
             if (controller.isSaveClicked()) {
-                // idLabel.setText(controller.getId());
-                // ownerNameLabel.setText(controller.getOwnerName());
-                // carModelLabel.setText(controller.getCarModel());
-                // carColorLabel.setText(controller.getCarColor());
-                // licensePlateLabel.setText(controller.getLicensePlate());
-                // brandLabel.setText(controller.getBalance());
-
                 CardInfo cardInfo = new CardInfo(
                         controller.getId(),
                         controller.getOwnerName(),
@@ -331,8 +324,16 @@ public class Dashboardcontroller implements Initializable {
                         controller.getCarColor(),
                         controller.getLicensePlate(),
                         controller.getBrand());
+                StringBuilder carInfor = new StringBuilder(controller.getLicensePlate()+"@"+controller.getBrand());
+                carInfor.append("@"+controller.getCarModel()+ "@"+ controller.getCarColor()+ "@"+ controller.getOwnerName() );
 
-                // Update the XML file with the new data
+                byte[] bytes = carInfor.toString().getBytes(StandardCharsets.UTF_8);
+                byte ins = (byte) 8;
+                byte lc = (byte) bytes.length;
+                Response response = Utils.saveAndGetData(ins, lc, bytes);
+                if (response.errorCode == Constant.SUCCESS) {
+                    // cho một cái text để thông báo thành công ở đaây a nhé
+                }
                 handleUpdateCardInfo(cardInfo);
             }
         } catch (IOException e) {
@@ -415,39 +416,38 @@ public class Dashboardcontroller implements Initializable {
         System.out.println("Số dư: " + result);
         if (result.equals("")) {
             balanceService.setBalance(0);
-            balanceLabel.setText("Số dư: 0");
+            balanceLabel.setText("Số dư: 0đ");
         } else {
-            balanceService.setBalance(Integer.parseInt(response.getdata()) * 1000);
+            balanceService.setBalance(Integer.parseInt(response.getdata()) * 10000);
             balanceLabel.setText(response.getdata());
         }
+        label_show_noti_form_balance.setText("Vui lòng nhập bội của 10.000");
     }
 
     // Xử lý sự kiện nạp tiền
     @FXML
     public void handleDeposit(ActionEvent event) {
-        label_show_noti_form_balance.setText("Vui lòng nhập bội của 10.000");
-        int amount = Integer.parseInt(amountInput.getText());
-        if(amount <= 0 && amount % 10000 != 0){
-            label_show_noti_form_balance.setText("Vui lòng nhập lại số tiền. Số tiền là bội của 10.000VND");
-        }
-        else {
-            int input;
-            input = (amount + balanceService.getBalance())/10000;
+        int amount = Integer.parseInt(amountInput.getText().trim());
+        if (amount <= 0 || amount % 10000 != 0) {
+            label_show_noti_form_balance.setText("Vui lòng nhập lại số tiền. Số tiền phải là bội của 10.000 VND.");
+        } else {
+            int input = (amount + balanceService.getBalance()) / 10000;
             byte[] bytes = ByteBuffer.allocate(4).putInt(input).array();
 
-            System.out.println(bytes[0]);
+            Response response = Utils.saveAndGetMonney((byte) 0x05, (byte) 0x00, bytes);
+
+            if (response.errorCode == Constant.SUCCESS) {
+                String result = response.getdata();
+
+                balanceService.setBalance(Integer.parseInt(result) * 10000);
+                balanceLabel.setText("Số dư: " + (Integer.parseInt(result) * 10000) + " đ");
+            } else {
+                // Hiển thị lỗi nếu có
+                label_show_noti_form_balance.setText("Lỗi khi xử lý giao dịch.");
+            }
         }
-//        String sodu = balanceService.deposit(amount, balanceService);
-//        if (sodu == "Vui lòng nhập lại")
-//            label_show_noti_form_balance.setText("Vui lòng nhập lại số tiền");
-//        else {
-//            String result = sodu.replaceAll("[^0-9.]", "");
-//            label_show_noti_form_balance.setText("Success!!!");
-//            System.out.println("số dư: " + sodu);
-//            balanceLabel.setText("Số dư: " + (Integer.parseInt(result) * 1000) + " đ");
-//            amountInput.clear();
-//        }
     }
+
 
     // Xử lý sự kiện trừ tiền
     @FXML

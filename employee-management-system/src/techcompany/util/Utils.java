@@ -8,9 +8,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import techcompany.entities.Response;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.security.Signature;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import javax.imageio.ImageIO;
@@ -141,6 +143,39 @@ public class Utils {
         }
     }
 
+    public static Response saveAndGetMonney(byte ins, byte lc, byte[] data) {
+        try {
+            if (cardChannel == null) {
+                return new Response(Constant.UNKNOWN_ERROR, "No card channel available!");
+            }
+
+            CommandAPDU commandAPDU = new CommandAPDU(0x00, ins, 0x00, 0x00, data);
+            ResponseAPDU responseAPDU = cardChannel.transmit(commandAPDU);
+
+            if (responseAPDU.getSW() == 0x9000) {
+                byte[] responseData = responseAPDU.getData();
+                String hexString = bytesToHex(responseData);
+                String responseDataString = hexToString(hexString);
+
+                if (responseData.length >= 4) {
+                    byte[] balanceBytes = Arrays.copyOfRange(responseData, 0, 4); // Lấy 4 byte đầu (số dư)
+                    int balance = ByteBuffer.wrap(balanceBytes).getInt(); // Chuyển 4 byte thành số nguyên
+                    return new Response(Constant.SUCCESS, String.valueOf(balance));
+                } else {
+                    return new Response(Constant.UNKNOWN_ERROR, "Invalid response data length.");
+                }
+            } else {
+                return new Response(Constant.UNKNOWN_ERROR,
+                        "Failed to send data, SW=" + Integer.toHexString(responseAPDU.getSW()));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Response(Constant.UNKNOWN_ERROR, "Exception during SEND DATA: " + e.getMessage());
+        }
+    }
+
+
+
     private static String bytesToHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {
@@ -156,6 +191,7 @@ public class Utils {
         }
         return new String(bytes, StandardCharsets.UTF_8);
     }
+
 
     public static byte[] getBytesFromFile(File file) throws IOException {
         try (FileInputStream fileInputStream = new FileInputStream(file);

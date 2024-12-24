@@ -6,6 +6,5 @@ public class CardInfo {
     public CardInfo(String id, String ownerName, String carModel, String carColor, String licensePlate, String brandLabel) {
     }
 
-    // Getters and setters
-    // ...
+
 }
