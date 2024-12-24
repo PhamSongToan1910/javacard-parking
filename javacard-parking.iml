@@ -38,6 +38,11 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
+          <root url="file://$MODULE_DIR$/../javafx-sdk-21.0.5/lib" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+        <jarDirectory url="file://$MODULE_DIR$/../javafx-sdk-21.0.5/lib" recursive="false" />
           <root url="file://$USER_HOME$/Downloads/Compressed/javafx-sdk-21.0.5/lib" />
         </CLASSES>
         <JAVADOC />
