@@ -297,10 +297,20 @@ public class Dashboardcontroller implements Initializable {
 
     @FXML
     private void handleDisconnectCard() {
-        disconnectCardBtn.setDisable(true);
-        editCardInfo.setDisable(true);
-        updateImageBtn.setDisable(true);
-        statusLabel.setText("Xin hãy kết nối thẻ");
+        int input = (balanceService.getBalance() - 10000) / 10000;
+        byte[] bytes = ByteBuffer.allocate(4).putInt(input).array();
+
+        Response response = Utils.saveAndGetMonney((byte) 0x05, (byte) 0x00, bytes);
+
+        if (response.errorCode == Constant.SUCCESS) {
+            disconnectCardBtn.setDisable(true);
+            editCardInfo.setDisable(true);
+            updateImageBtn.setDisable(true);
+            statusLabel.setText("Xin hãy kết nối thẻ");
+        } else {
+            label_show_noti_form_balance.setText("Lỗi khi xử lý giao dịch.");
+        }
+
     }
 
     @FXML
@@ -437,7 +447,7 @@ public class Dashboardcontroller implements Initializable {
 
     public void getSoDu() {
         byte ins = (byte) 06;
-        Response response = Utils.getData(ins);
+        Response response = Utils.getMonney(ins);
         String result = response.getdata().replace("@", "");
         System.out.println("Số dư: " + result);
         if (result.equals("")) {
@@ -445,7 +455,8 @@ public class Dashboardcontroller implements Initializable {
             balanceLabel.setText("Số dư: 0đ");
         } else {
             balanceService.setBalance(Integer.parseInt(response.getdata()) * 10000);
-            balanceLabel.setText(response.getdata());
+            balanceLabel.setText("Số dư: " + (Integer.parseInt(result) * 10000) + " đ");
+            amountInput.setText("");
         }
         label_show_noti_form_balance.setText("Vui lòng nhập bội của 10.000");
     }
