@@ -1,6 +1,5 @@
 # Ignore everything
 ../out
-*
+
 # But not these files...
 !.gitignore
-!employee-management-system/
