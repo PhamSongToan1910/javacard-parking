@@ -10,6 +10,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import javafx.scene.image.Image;
@@ -168,11 +169,22 @@ public class Dashboardcontroller implements Initializable {
 
     private BalanceService balanceService;
 
+    // Thêm các phần tử thay đổi mã PIN
+    @FXML
+    private PasswordField oldPinField;
+    @FXML
+    private PasswordField newPinField;
+    @FXML
+    private PasswordField confirmPinField;
+    @FXML
+    private Label errorLabel;
+    @FXML
+    private Button getChangePin_btn;
+
     public Dashboardcontroller() {
         // Khởi tạo số dư ban đầu (giả sử là 1 triệu đồng)
         balanceService = new BalanceService(1000000);
     }
-
 
     public void switchForm(ActionEvent event) {
         if (event.getSource() == home_btn) {
@@ -200,8 +212,6 @@ public class Dashboardcontroller implements Initializable {
                 depDesig_form.setVisible(true);
         }
     }
-
-
 
     public void close() {
         System.exit(0);
@@ -326,8 +336,6 @@ public class Dashboardcontroller implements Initializable {
         }
         return null;
     }
-
-
     // Xử lý sự kiện nạp tiền
     @FXML
     public void handleDeposit(ActionEvent event) {
@@ -341,7 +349,6 @@ public class Dashboardcontroller implements Initializable {
             label_show_noti_form_balance.setText("Vui lòng nhập số tiền hợp lệ!");
         }
     }
-
     // Xử lý sự kiện trừ tiền
     @FXML
     public void handleWithdraw(ActionEvent event) {
@@ -355,5 +362,44 @@ public class Dashboardcontroller implements Initializable {
             label_show_noti_form_balance.setText("Vui lòng nhập số tiền hợp lệ!");
         }
     }
+    //Xử lý chức năng đổi mã PIN
+    @FXML
+    private void handleConfirmButton() {
+        String oldPin = oldPinField.getText();
+        String newPin = newPinField.getText();
+        String confirmPin = confirmPinField.getText();
 
+        try {
+            if (newPin.equals(oldPin)) {
+                errorLabel.setText("Mật khẩu mới không được trùng với mật khẩu cũ!");
+                return;
+            }
+
+
+            if (!newPin.equals(confirmPin)) {
+                errorLabel.setText("Mật khẩu mới không khớp!");
+                return;
+            }
+
+
+            boolean isOldPinCorrect = checkOldPin(oldPin);
+
+            if (!isOldPinCorrect) {
+                errorLabel.setText("Mật khẩu cũ không chính xác!");
+            }
+//        else {
+//
+//          DIỄM TỰ XỬ NỐT Ở ĐÂU NHA
+
+//        }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private boolean checkOldPin(String oldPin) {
+
+        return true;
+    };
 }
