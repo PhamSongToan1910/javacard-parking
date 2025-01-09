@@ -232,7 +232,7 @@ public class Dashboardcontroller implements Initializable {
     public void enableCard() {
         Response response = Utils.connectCardAndGetID();
         if (response.errorCode == Constant.SUCCESS) {
-            label_show_noti_form_create.setText("Success!!!");
+            label_show_noti_form_create.setText("Đã kích hoạt thành công");
             idCard = response.getdata();
             id_card.setText(response.data);
         } else {
@@ -249,13 +249,14 @@ public class Dashboardcontroller implements Initializable {
     }
 
     @FXML
-    private void handleConnectCard() {
+    private void handleConnectCard() throws Exception {
         String pin = pinInput.getText();
         if (isValidPin(pin)) {
-            byte[] pinBytes = pin.getBytes(StandardCharsets.UTF_8);
+            byte[] pinBytes = Utils.encryptData(pin,Utils.publicKey);
+            System.out.println("mã hóa: " + pinBytes.toString());
             byte ins = (byte) 02;
             byte lc = (byte) pinBytes.length;
-            Response response = Utils.saveAndGetData(ins, lc, pinBytes);
+            Response response = Utils.login(ins, lc, pinBytes);
             if (response.errorCode == Constant.SUCCESS) {
                 String infor = response.getdata();
                 String[] parts = infor.split("@");
@@ -273,17 +274,25 @@ public class Dashboardcontroller implements Initializable {
                 editCardInfo.setDisable(false);
                 updateImageBtn.setDisable(false);
                 pinErrorText.setText("");
+                addUser_btn.setDisable(false);
+                changePin_btn.setDisable(false);
             } else {
                 incorrectPinAttempts++;
                 if (incorrectPinAttempts >= MAX_INCORRECT_ATTEMPTS) {
-                    connectCardBtn.setDisable(true);
                     editCardInfo.setDisable(true);
                     pinErrorText.setVisible(true);
                     pinErrorText.setText("Bạn đã nhập quá số lần cho phép.");
+
+
                 } else {
                     pinErrorText.setVisible(true);
-                    connectCardBtn.setDisable(true);
                     editCardInfo.setDisable(true);
+                    disconnectCardBtn.setDisable(true);
+                    updateImageBtn.setDisable(true);
+                    statusLabel.setText("Xin hãy kết nối thẻ");
+                    addUser_btn.setDisable(true);
+                    changePin_btn.setDisable(true);
+                    resetConnectField();
                     int remainingAttempts = MAX_INCORRECT_ATTEMPTS - incorrectPinAttempts;
                     pinErrorText.setText("Sai mã PIN: Bạn còn " + remainingAttempts + " lần nhập lại");
                 }
@@ -291,8 +300,17 @@ public class Dashboardcontroller implements Initializable {
         } else {
             // Display an error message for invalid PIN
             pinErrorText.setVisible(true);
-            pinErrorText.setText("Invalid PIN. Please enter a valid PIN.");
+            pinErrorText.setText("Cần phải nhập mã PIN");
         }
+    }
+
+    private void resetConnectField() {
+        idLabel.setText("Text ID");
+        licensePlateLabel.setText("Tên chủ xe");
+        brandLabel.setText("Hãng xe");
+        carModelLabel.setText("Mẫu xe");
+        carColorLabel.setText("Màu xe");
+        ownerNameLabel.setText("Tên chủ xe");
     }
 
     @FXML
@@ -307,6 +325,9 @@ public class Dashboardcontroller implements Initializable {
             editCardInfo.setDisable(true);
             updateImageBtn.setDisable(true);
             statusLabel.setText("Xin hãy kết nối thẻ");
+            addUser_btn.setDisable(true);
+            changePin_btn.setDisable(true);
+            resetConnectField();
         } else {
             label_show_noti_form_balance.setText("Lỗi khi xử lý giao dịch.");
         }
@@ -389,6 +410,15 @@ public class Dashboardcontroller implements Initializable {
     }
 
     public void createCar() {
+        if(pin_code.getText().equals("")){
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Lỗi");
+            alert.setHeaderText(null);
+            alert.setContentText("Vui lòng nhập mã pin");
+            alert.showAndWait();
+            return ;
+        }
+
         String idCard = id_card.getText();
         String OwnerCar = OwnerName.getText();
         String modelCar = model_car.getText();
@@ -401,8 +431,25 @@ public class Dashboardcontroller implements Initializable {
         byte[] bytes = carStr.getBytes(StandardCharsets.UTF_8);
         byte ins = (byte) 01;
         byte lc = (byte) bytes.length;
-        Response response = Utils.saveAndGetData(ins, lc, bytes);
+        Response response = Utils.saveAndGetRSA(ins, lc, bytes);
         if (response.errorCode == Constant.SUCCESS) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Thành công");
+            alert.setHeaderText(null);
+            alert.setContentText(" Khởi tạo thẻ thành công");
+            alert.showAndWait();
+
+            id_card.setText("");
+            OwnerName.setText("");
+            model_car.setText("");
+            color_car.setText("");
+            type_of_car.setText("");
+            number_of_car.setText("");
+            pin_code.setText("");
+            label_show_noti_form_create.setText("Chưa khỏi tạo thẻ");
+
+
+
             pinCode = "";
             String publicKey = response.getdata();
             BigDecimal balance = new BigDecimal("1000000.00");
@@ -411,6 +458,14 @@ public class Dashboardcontroller implements Initializable {
             car.setPublicKey(publicKey);
             car.setIdCard(idCard);
             CarService.createCarInfo(connect, car);
+
+
+        } else {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Lỗi");
+            alert.setHeaderText(null);
+            alert.setContentText("Lỗi chưa khởi tạo được thẻ");
+            alert.showAndWait();
         }
     }
 
@@ -423,6 +478,12 @@ public class Dashboardcontroller implements Initializable {
         if (selectedFile != null) {
             try {
                 imageByte = Utils.getBytesFromFile(selectedFile);
+                System.out.println("ảnh: ");
+                for (byte b : imageByte) {
+                    System.out.printf("%02X ", b); // In mỗi byte dưới dạng 2 ký tự hex, ví dụ: FF
+                }
+                System.out.println();
+
                 Image image = new Image(selectedFile.toURI().toString());
                 choose_image_view.setImage(image);
                 choose_image_view.setFitWidth(120);
@@ -446,7 +507,7 @@ public class Dashboardcontroller implements Initializable {
     }
 
     public void getSoDu() {
-        byte ins = (byte) 06;
+        byte ins = (byte) 0x06;
         Response response = Utils.getMonney(ins);
         String result = response.getdata().replace("@", "");
         System.out.println("Số dư: " + result);
@@ -478,6 +539,7 @@ public class Dashboardcontroller implements Initializable {
 
                 balanceService.setBalance(Integer.parseInt(result) * 10000);
                 balanceLabel.setText("Số dư: " + (Integer.parseInt(result) * 10000) + " đ");
+                amountInput.setText("");
             } else {
                 // Hiển thị lỗi nếu có
                 label_show_noti_form_balance.setText("Lỗi khi xử lý giao dịch.");
@@ -507,39 +569,34 @@ public class Dashboardcontroller implements Initializable {
         String newPin = newPinField.getText();
         String confirmPin = confirmPinField.getText();
 
-
         try {
-            if (newPin.equals(oldPin)) {
-                errorLabel.setText("Mã PIN mới không được trùng với Mã PIN cũ!");
-                return;
+            byte[] bytes = oldPin.getBytes(StandardCharsets.UTF_8);
+            Response response = Utils.changePassword((byte) 0x09, bytes);
+            if (response.errorCode != Constant.SUCCESS) {
+                errorLabel.setText("Mã PIN hiện tại nhập không đúng vui lòng nhập lại.");
+            }
+            else if (!newPin.equals(confirmPin)) {
+                errorLabel.setText("Vui lòng nhập lại mã PIN mới không khớp!");
+            }
+            else{
+                byte[] byte1s = newPin.getBytes(StandardCharsets.UTF_8);
+                Response response1 = Utils.changePassword((byte) 0x04, byte1s);
+                if(response1.errorCode == Constant.SUCCESS) {
+                    errorLabel.setText("Thay đổi mã pin thành công!");
+                    oldPinField.setText("");
+                    newPinField.setText("");
+                    confirmPinField.setText("");
+                }
+                else {
+                    errorLabel.setText("Vui lòng nhập mã pin mới khác với mã pin cũ.");
+                }
             }
 
 
-            if (!newPin.equals(confirmPin)) {
-                errorLabel.setText("Mã PIN mới không khớp!");
-                return;
-            }
-
-
-            boolean isOldPinCorrect = checkOldPin(oldPin);
-
-            if (!isOldPinCorrect) {
-                errorLabel.setText("Trùng mã PIN cũ");
-            }
-//        else {
-//
-//          DIỄM TỰ XỬ NỐT Ở ĐÂU NHA
-
-//        }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
     }
-
-    private boolean checkOldPin(String oldPin) {
-
-        return true;
-    };
 
 }

@@ -1,4 +1,3 @@
-
 package techcompany.util;
 
 import java.awt.image.BufferedImage;
@@ -8,10 +7,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import techcompany.entities.Response;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.Signature;
+import java.security.spec.RSAPublicKeySpec;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -25,13 +27,13 @@ import javax.smartcardio.CardTerminal;
 import javax.smartcardio.CommandAPDU;
 import javax.smartcardio.ResponseAPDU;
 import javax.smartcardio.TerminalFactory;
-import techcompany.entities.Response;
+import javax.crypto.Cipher;
 
 public class Utils {
 
     public static final byte[] SELECT_APPLET = new byte[] { 0x11, 0x22, 0x33, 0x44, 0x55, 0x01 };
 
-    // public PublicKey publicKey =
+     public static PublicKey publicKey;
 
     private static CardChannel cardChannel = null; // Duy trì CardChannel toàn cục
 
@@ -122,17 +124,103 @@ public class Utils {
         }
     }
 
-    public static Response getData(byte ins) {
+    public static Response login(byte ins, byte lc, byte[] data) {
         try {
             if (cardChannel == null) {
                 return new Response(Constant.UNKNOWN_ERROR, "No card channel available!");
             }
-            CommandAPDU commandAPDU = new CommandAPDU(0x00, ins, 0x00, 0x00);
+            CommandAPDU commandAPDU = new CommandAPDU(0x00, ins, 0x00, 0x00, data);
+            ResponseAPDU responseAPDU = cardChannel.transmit(commandAPDU);
+            if (responseAPDU.getSW() == 0x9000) {
+                byte[] responseData = responseAPDU.getData();
+
+                Signature signature = Signature.getInstance("SHA1withRSA"); // Hoặc "SHA256withRSA" nếu dùng SHA-256
+                signature.initVerify(publicKey);
+                signature.update("SUCCESS".getBytes());
+                if(signature.verify(responseData)){
+                     commandAPDU = new CommandAPDU(0x00, 0x0A, 0x00, 0x00);
+                     responseAPDU = cardChannel.transmit(commandAPDU);
+
+                    if (responseAPDU.getSW() == 0x9000) {
+                        responseData = responseAPDU.getData();
+                        return new Response(Constant.SUCCESS, hexToString(bytesToHex(responseData)));
+                    } else {
+                        return new Response(Constant.UNKNOWN_ERROR,
+                                "Failed to send data, SW=" + Integer.toHexString(responseAPDU.getSW()));
+                    }
+                }else {
+                    return new Response(Constant.UNKNOWN_ERROR,
+                            "Failed to send data, SW=" + Integer.toHexString(responseAPDU.getSW()));
+                }
+            } else {
+                return new Response(Constant.UNKNOWN_ERROR,
+                        "Failed to send data, SW=" + Integer.toHexString(responseAPDU.getSW()));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Response(Constant.UNKNOWN_ERROR, "Exception during SEND DATA: " + e.getMessage());
+        }
+    }
+
+    public static Response saveAndGetRSA(byte ins, byte lc, byte[] data) {
+        try {
+            if (cardChannel == null) {
+                return new Response(Constant.UNKNOWN_ERROR, "No card channel available!");
+            }
+            CommandAPDU commandAPDU = new CommandAPDU(0x00, ins, 0x00, 0x00, data);
             ResponseAPDU responseAPDU = cardChannel.transmit(commandAPDU);
 
             if (responseAPDU.getSW() == 0x9000) {
                 byte[] responseData = responseAPDU.getData();
+                processAPDUResponse(responseData);
+                System.out.println("Public Key: " + publicKey);
                 return new Response(Constant.SUCCESS, hexToString(bytesToHex(responseData)));
+            } else {
+                return new Response(Constant.UNKNOWN_ERROR,
+                        "Failed to send data, SW=" + Integer.toHexString(responseAPDU.getSW()));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Response(Constant.UNKNOWN_ERROR, "Exception during SEND DATA: " + e.getMessage());
+        }
+    }
+
+    public static void generatePublicKey(byte[] modulus, byte[] exponent) throws Exception {
+        BigInteger mod = new BigInteger(1, modulus);
+        BigInteger exp = new BigInteger(1, exponent);
+        RSAPublicKeySpec spec = new RSAPublicKeySpec(mod, exp);
+        KeyFactory factory = KeyFactory.getInstance("RSA");
+        publicKey = factory.generatePublic(spec);
+    }
+
+    public static void processAPDUResponse(byte[] apduResponse) throws Exception {
+        int modLen = 128;
+        int expLen = apduResponse.length - modLen;
+
+        byte[] modulus = new byte[modLen];
+        System.arraycopy(apduResponse, 0, modulus, 0, modLen);
+
+        byte[] exponent = new byte[expLen];
+        System.arraycopy(apduResponse, modLen, exponent, 0, expLen);
+        generatePublicKey(modulus, exponent);
+    }
+
+    public static byte[] encryptData(String data, PublicKey publicKey) throws Exception {
+        Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+        return cipher.doFinal(data.getBytes("UTF-8"));
+    }
+
+    public static Response changePassword(byte ins, byte[] data) {
+        try {
+            if (cardChannel == null) {
+                return new Response(Constant.UNKNOWN_ERROR, "No card channel available!");
+            }
+            CommandAPDU commandAPDU = new CommandAPDU(0x00, ins, 0x00, 0x00, data);
+            ResponseAPDU responseAPDU = cardChannel.transmit(commandAPDU);
+
+            if (responseAPDU.getSW() == 0x9000) {
+                return new Response(Constant.SUCCESS, "SUCCESS");
             } else {
                 return new Response(Constant.UNKNOWN_ERROR,
                         "Failed to send data, SW=" + Integer.toHexString(responseAPDU.getSW()));
@@ -154,9 +242,6 @@ public class Utils {
 
             if (responseAPDU.getSW() == 0x9000) {
                 byte[] responseData = responseAPDU.getData();
-                String hexString = bytesToHex(responseData);
-                String responseDataString = hexToString(hexString);
-
                 if (responseData.length >= 4) {
                     byte[] balanceBytes = Arrays.copyOfRange(responseData, 0, 4); // Lấy 4 byte đầu (số dư)
                     int balance = ByteBuffer.wrap(balanceBytes).getInt(); // Chuyển 4 byte thành số nguyên
