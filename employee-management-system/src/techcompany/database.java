@@ -18,7 +18,7 @@ public class database {
     
         try{
   
-            Connection connect = DriverManager.getConnection("jdbc:mysql://localhost/employee","root","123456");
+            Connection connect = DriverManager.getConnection("jdbc:mysql://localhost/java_parking","root","123456");
             return connect;
             
             

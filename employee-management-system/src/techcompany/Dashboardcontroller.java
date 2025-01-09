@@ -27,6 +27,7 @@ import techcompany.entities.History;
 import techcompany.entities.Response;
 import techcompany.service.CarService;
 import techcompany.service.BalanceService;
+import techcompany.service.HistoryService;
 import techcompany.util.Constant;
 import techcompany.util.Utils;
 import techcompany.entities.CardInfo;
@@ -46,6 +47,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class Dashboardcontroller implements Initializable {
@@ -195,6 +199,8 @@ public class Dashboardcontroller implements Initializable {
     private PreparedStatement prepare;
     private ResultSet result;
     private byte[] imageByte;
+    private long timeInLong;
+    private long timeOutLong;
 
     // Thêm các phần tử liên quan đến chức năng nạp/trừ tiền
     @FXML
@@ -570,19 +576,21 @@ public class Dashboardcontroller implements Initializable {
     @FXML
     private void handleIncomingCar(ActionEvent event) {
         //Để truyền data vào xin hãy làm giốn initialData
+        timeInLong = new Date().getTime();
+        HistoryService.createHistory(connect, new History(idCard, String.valueOf(timeInLong), String.valueOf(timeOutLong)));
     }
 
     @FXML
     private void handleOutgoingCar(ActionEvent event) {
         //Để truyền data vào bảng xin hãy làm giốn initialData
+        timeOutLong = new Date().getTime();
+        HistoryService.updateHistory(connect, new History(idCard, String.valueOf(timeOutLong), String.valueOf(timeOutLong)));
     }
 
     ObservableList<History> initialData() {
         ObservableList<History> historyList = FXCollections.observableArrayList();
-        // Create History objects with all 4 fields
-        History history1 = new History(1, "CAR001", "9:00 AM", "10:00 AM");
-        History history2 = new History(2, "CAR002", "11:00 AM", "12:00 PM");
-        historyList.addAll(history1, history2);
+        List<History> histories = HistoryService.getHistoryList(connect, idCard);
+        historyList.addAll(histories);
         return historyList;
     }
 

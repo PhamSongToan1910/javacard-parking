@@ -1,3 +1,4 @@
+
 package techcompany.util;
 
 import java.awt.image.BufferedImage;
@@ -117,6 +118,37 @@ public class Utils {
             } else {
                 return new Response(Constant.UNKNOWN_ERROR,
                         "Failed to send data, SW=" + Integer.toHexString(responseAPDU.getSW()));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Response(Constant.UNKNOWN_ERROR, "Exception during SEND DATA: " + e.getMessage());
+        }
+    }
+
+    public static Response saveImage(byte ins, byte lc, byte[] data) {
+        try {
+            TerminalFactory factory = TerminalFactory.getDefault();
+            List<CardTerminal> terminals = factory.terminals().list();
+            if (terminals.isEmpty()) {
+                return new Response(Constant.UNKNOWN_ERROR, "No card terminal found!");
+            } else {
+                CardTerminal terminal = terminals.get(0);
+                Card card = terminal.connect("T=1");
+                CardChannel cardChannel1 = card.getBasicChannel();
+                System.out.println("Connected with protocol: " + card.getProtocol());
+                if (cardChannel1 == null) {
+                    return new Response(Constant.UNKNOWN_ERROR, "No card channel available!");
+                }
+                CommandAPDU commandAPDU = new CommandAPDU(0x00, ins, 0x00, 0x00, data, 256);
+                ResponseAPDU responseAPDU = cardChannel1.transmit(commandAPDU);
+
+                if (responseAPDU.getSW() == 0x9000) {
+                    byte[] responseData = responseAPDU.getData();
+                    return new Response(Constant.SUCCESS, hexToString(bytesToHex(responseData)));
+                } else {
+                    return new Response(Constant.UNKNOWN_ERROR,
+                            "Failed to send data, SW=" + Integer.toHexString(responseAPDU.getSW()));
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -369,7 +401,7 @@ public class Utils {
             }
 
             // Giảm chất lượng nén thêm (ví dụ: giảm 10%)
-            quality -= quality * 0.5f;
+            quality = 0.5f;
         }
 
         writer.dispose();

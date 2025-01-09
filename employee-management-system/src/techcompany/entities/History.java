@@ -16,6 +16,12 @@ public class History {
         this.timeOut = timeOut;
     }
 
+    public History(String idCard, String timeIn, String timeOut) {
+        this.idCard = idCard;
+        this.timeIn = timeIn;
+        this.timeOut = timeOut;
+    }
+
     public int getId() {
         return id;
     }
