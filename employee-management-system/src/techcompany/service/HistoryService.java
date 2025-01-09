@@ -13,7 +13,7 @@ public class HistoryService {
     public static List<History> getHistoryList(Connection connect, String idCard) {
         List<History> histories = new ArrayList<>();
         try {
-            String sql = "select * from history where idCard = ?";
+            String sql = "select * from history where id_card = ?";
             assert connect != null;
             PreparedStatement pre = connect.prepareStatement(sql);
             pre.setString(1, idCard);
@@ -33,13 +33,13 @@ public class HistoryService {
     }
 
     public static void createHistory(Connection connect, History history) {
-        java.sql.Date timeIn = new java.sql.Date(Long.parseLong(history.getTimeIn()));
+        java.sql.Timestamp timeIn = new java.sql.Timestamp(Long.parseLong(history.getTimeIn()));
         try {
             String sql = "INSERT INTO history (id_card, time_in) VALUES\n" +
                     "(?, ?)";
             PreparedStatement pre = connect.prepareStatement(sql);
             pre.setString(1, history.getIdCard());
-            pre.setDate(2, timeIn);
+            pre.setTimestamp(2, timeIn);
             pre.executeUpdate();
             pre.close();
         } catch (Exception e) {
@@ -48,14 +48,13 @@ public class HistoryService {
     }
 
     public static void updateHistory(Connection connect, History history) {
-        java.sql.Date timeIn = new java.sql.Date(Long.parseLong(history.getTimeIn()));
-        java.sql.Date timeOut = new java.sql.Date(Long.parseLong(history.getTimeOut()));
+        java.sql.Timestamp timeIn = new java.sql.Timestamp(Long.parseLong(history.getTimeIn()));
+        java.sql.Timestamp timeOut = new java.sql.Timestamp(Long.parseLong(history.getTimeOut()));
         try {
-            String sql = "UPDATE history SET time_out = ? WHERE ID = ? and time_in = ?";
+            String sql = "UPDATE history SET time_out = ? WHERE id_card = ?";
             PreparedStatement pre = connect.prepareStatement(sql);
-            pre.setDate(1, timeOut);
+            pre.setTimestamp(1, timeOut);
             pre.setString(2, history.getIdCard());
-            pre.setDate(3, timeIn);
             pre.executeUpdate();
             pre.close();
         } catch (Exception e) {

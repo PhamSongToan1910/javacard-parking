@@ -194,10 +194,7 @@ public class Dashboardcontroller implements Initializable {
 
     private int incorrectPinAttempts = 0;
     private int MAX_INCORRECT_ATTEMPTS = 5;
-    private Connection connect;
-    private Statement statement;
-    private PreparedStatement prepare;
-    private ResultSet result;
+    private Connection connect = database.connectDb();
     private byte[] imageByte;
     private long timeInLong;
     private long timeOutLong;
@@ -578,13 +575,20 @@ public class Dashboardcontroller implements Initializable {
         //Để truyền data vào xin hãy làm giốn initialData
         timeInLong = new Date().getTime();
         HistoryService.createHistory(connect, new History(idCard, String.valueOf(timeInLong), String.valueOf(timeOutLong)));
+        initializeTableData();
+        incomingCarBtn.setDisable(true);
+        outgoingCarBtn.setDisable(false);
     }
 
     @FXML
     private void handleOutgoingCar(ActionEvent event) {
         //Để truyền data vào bảng xin hãy làm giốn initialData
         timeOutLong = new Date().getTime();
+        System.out.println(timeInLong);
         HistoryService.updateHistory(connect, new History(idCard, String.valueOf(timeOutLong), String.valueOf(timeOutLong)));
+        initializeTableData();
+        incomingCarBtn.setDisable(false);
+        outgoingCarBtn.setDisable(true);
     }
 
     ObservableList<History> initialData() {
