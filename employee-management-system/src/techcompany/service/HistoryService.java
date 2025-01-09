@@ -48,13 +48,14 @@ public class HistoryService {
     }
 
     public static void updateHistory(Connection connect, History history) {
-        java.sql.Timestamp timeIn = new java.sql.Timestamp(Long.parseLong(history.getTimeIn()));
         java.sql.Timestamp timeOut = new java.sql.Timestamp(Long.parseLong(history.getTimeOut()));
+        java.sql.Timestamp timeIn = new java.sql.Timestamp(Long.parseLong(history.getTimeIn()));
         try {
-            String sql = "UPDATE history SET time_out = ? WHERE id_card = ?";
+            String sql = "UPDATE history SET time_out = ? WHERE id_card = ? AND time_in = ?";
             PreparedStatement pre = connect.prepareStatement(sql);
             pre.setTimestamp(1, timeOut);
             pre.setString(2, history.getIdCard());
+            pre.setTimestamp(3, timeIn);
             pre.executeUpdate();
             pre.close();
         } catch (Exception e) {

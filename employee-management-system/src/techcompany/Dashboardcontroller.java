@@ -198,6 +198,7 @@ public class Dashboardcontroller implements Initializable {
     private byte[] imageByte;
     private long timeInLong;
     private long timeOutLong;
+    private Car car;
 
     // Thêm các phần tử liên quan đến chức năng nạp/trừ tiền
     @FXML
@@ -473,7 +474,7 @@ public class Dashboardcontroller implements Initializable {
         String typeOfCar = type_of_car.getText();
         String numberOfCar = number_of_car.getText();
         String pinCode = String.valueOf(pin_code.getText());
-        Car car = new Car(OwnerCar, modelCar, typeOfCar, colorCar, numberOfCar, pinCode);
+        car = new Car(OwnerCar, modelCar, typeOfCar, colorCar, numberOfCar, pinCode);
         String carStr = car.toString();
         byte[] bytes = carStr.getBytes(StandardCharsets.UTF_8);
         byte ins = (byte) 01;
@@ -497,7 +498,6 @@ public class Dashboardcontroller implements Initializable {
 
 
 
-            pinCode = "";
             String publicKey = response.getdata();
             BigDecimal balance = new BigDecimal("1000000.00");
             car.setBalance(balance);
@@ -573,7 +573,7 @@ public class Dashboardcontroller implements Initializable {
     @FXML
     private void handleIncomingCar(ActionEvent event) {
         //Để truyền data vào xin hãy làm giốn initialData
-        timeInLong = new Date().getTime();
+        timeInLong = System.currentTimeMillis();
         HistoryService.createHistory(connect, new History(idCard, String.valueOf(timeInLong), String.valueOf(timeOutLong)));
         initializeTableData();
         incomingCarBtn.setDisable(true);
@@ -583,12 +583,33 @@ public class Dashboardcontroller implements Initializable {
     @FXML
     private void handleOutgoingCar(ActionEvent event) {
         //Để truyền data vào bảng xin hãy làm giốn initialData
-        timeOutLong = new Date().getTime();
-        System.out.println(timeInLong);
-        HistoryService.updateHistory(connect, new History(idCard, String.valueOf(timeOutLong), String.valueOf(timeOutLong)));
-        initializeTableData();
-        incomingCarBtn.setDisable(false);
-        outgoingCarBtn.setDisable(true);
+        if(car.getBalance().compareTo(new BigDecimal(10000)) >= 0) {
+            timeOutLong = System.currentTimeMillis();
+            HistoryService.updateHistory(connect, new History(idCard, String.valueOf(timeInLong), String.valueOf(timeOutLong)));
+            initializeTableData();
+            car.setBalance(car.getBalance().subtract(new BigDecimal(10000)));
+            int input = car.getBalance().intValue() / 10000;
+            System.out.println(input);
+            byte[] bytes = ByteBuffer.allocate(4).putInt(input).array();
+
+            Response response = Utils.saveAndGetMonney((byte) 0x05, (byte) 0x00, bytes);
+            if (response.errorCode == Constant.SUCCESS) {
+                incomingCarBtn.setDisable(false);
+                outgoingCarBtn.setDisable(true);
+            } else {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Lỗi");
+                alert.setHeaderText(null);
+                alert.setContentText("Không thể thanh toán");
+                alert.showAndWait();
+            }
+        } else {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Lỗi");
+            alert.setHeaderText(null);
+            alert.setContentText("Số dư hiện tại không đủ vui lòng nạp thêm!!!");
+            alert.showAndWait();
+        }
     }
 
     ObservableList<History> initialData() {
@@ -617,7 +638,8 @@ public class Dashboardcontroller implements Initializable {
         if (amount <= 0 || amount % 10000 != 0) {
             label_show_noti_form_balance.setText("Vui lòng nhập lại số tiền. Số tiền phải là bội của 10.000 VND.");
         } else {
-            int input = (amount + balanceService.getBalance()) / 10000;
+            car.setBalance(car.getBalance().add(new BigDecimal(amount)));
+            int input = car.getBalance().intValue() / 10000;
             byte[] bytes = ByteBuffer.allocate(4).putInt(input).array();
 
             Response response = Utils.saveAndGetMonney((byte) 0x05, (byte) 0x00, bytes);
@@ -625,7 +647,6 @@ public class Dashboardcontroller implements Initializable {
             if (response.errorCode == Constant.SUCCESS) {
                 String result = response.getdata();
 
-                balanceService.setBalance(Integer.parseInt(result) * 10000);
                 balanceLabel.setText("Số dư: " + (Integer.parseInt(result) * 10000) + " đ");
                 amountInput.setText("");
             } else {
@@ -640,11 +661,23 @@ public class Dashboardcontroller implements Initializable {
     @FXML
     public void handleWithdraw(ActionEvent event) {
         try {
-            double amount = Double.parseDouble(amountInput.getText());
-            String message = balanceService.withdraw(amount);
-            balanceLabel.setText("Số dư: " + balanceService.getBalance() + " đ");
-            amountInput.clear();
-            label_show_noti_form_balance.setText(message);
+            int amount = Integer.parseInt(amountInput.getText());
+            String message = balanceService.withdraw(new BigDecimal(amount), car);
+            int input = car.getBalance().intValue() / 10000;
+            byte[] bytes = ByteBuffer.allocate(4).putInt(input).array();
+
+            Response response = Utils.saveAndGetMonney((byte) 0x05, (byte) 0x00, bytes);
+
+            if (response.errorCode == Constant.SUCCESS) {
+                String result = response.getdata();
+
+                balanceLabel.setText("Số dư: " + (Integer.parseInt(result) * 10000) + " đ");
+                amountInput.setText("");
+                label_show_noti_form_balance.setText(message);
+            } else {
+                // Hiển thị lỗi nếu có
+                label_show_noti_form_balance.setText("Lỗi khi xử lý giao dịch.");
+            }
         } catch (NumberFormatException e) {
             label_show_noti_form_balance.setText("Vui lòng nhập số tiền hợp lệ!");
         }

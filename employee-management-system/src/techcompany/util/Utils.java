@@ -2,10 +2,9 @@
 package techcompany.util;
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
+
+import javafx.scene.image.Image;
 import techcompany.entities.Response;
 
 import java.math.BigInteger;
@@ -408,5 +407,10 @@ public class Utils {
 
         // Trả về byte[] nếu đạt mục tiêu, ngược lại trả về null
         return (imageBytes != null && imageBytes.length <= targetSizeInBytes) ? imageBytes : null;
+    }
+
+    public static Image convertByteToImage(byte[] imageBytes) {
+        ByteArrayInputStream bais = new ByteArrayInputStream(imageBytes);
+        return new Image(bais);
     }
 }

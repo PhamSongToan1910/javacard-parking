@@ -1,9 +1,11 @@
 package techcompany.service;
 
+import techcompany.entities.Car;
 import techcompany.entities.Response;
 import techcompany.util.Constant;
 import techcompany.util.Utils;
 
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 
 public class BalanceService {
@@ -43,15 +45,15 @@ public class BalanceService {
     }
 
     // Method to withdraw money
-    public String withdraw(double amount) {
-        if (amount <= 0) {
+    public String withdraw(BigDecimal amount, Car car) {
+        if (amount.compareTo(new BigDecimal(0)) < 0) {
             return "Số tiền trừ phải lớn hơn 0.";
         }
-        if (amount > balance) {
+        if (amount.compareTo(car.getBalance()) > 0) {
             return "Số dư không đủ để trừ số tiền này.";
         }
-        balance -= amount;
-        return "Trừ tiền thành công. Số dư hiện tại: " + balance + " đ";
+        car.setBalance(car.getBalance().subtract(amount));
+        return "Trừ tiền thành công. Số dư hiện tại: " + car.getBalance().intValue() + "đ";
     }
 
 }
