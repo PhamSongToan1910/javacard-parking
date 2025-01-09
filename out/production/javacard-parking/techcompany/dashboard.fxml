@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.jensd.fx.glyphs.fontawesome.*?>
-<?import java.lang.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.*?>
-<?import javafx.scene.text.*?>
+<?import java.lang.String?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.text.Font?>
 
-<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="techcompany.Dashboardcontroller">
+<?import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon?>
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="techcompany.Dashboardcontroller">
    <children>
       <AnchorPane fx:id="main_form" prefHeight="200.0" prefWidth="200.0">
          <children>
@@ -58,13 +65,19 @@
                                     <String fx:value="shadow" />
                                  </styleClass>
                               </Button>
-                              <Button fx:id="addUser_btn" alignment="CENTER" contentDisplay="CENTER" disable="true" layoutX="10.0" layoutY="215.0" mnemonicParsing="false" onAction="#switchForm" prefHeight="35.0" prefWidth="180.0" stylesheets="@dashboardDesign.css" text="Số dư" textAlignment="CENTER">
+                              <Button fx:id="historyPage_btn" layoutX="10.0" layoutY="214.0" mnemonicParsing="false" onAction="#switchForm" prefHeight="35.0" prefWidth="180.0" stylesheets="@dashboardDesign.css" text="Lịch sử">
                                  <styleClass>
                                     <String fx:value="nav-btn" />
                                     <String fx:value="shadow" />
                                  </styleClass>
                               </Button>
-                              <Button fx:id="changePin_btn" alignment="CENTER" contentDisplay="CENTER" disable="true" layoutX="10.0" layoutY="260.0" mnemonicParsing="false" onAction="#switchForm" prefHeight="35.0" prefWidth="180.0" stylesheets="@dashboardDesign.css" text="Mã PIN" textAlignment="CENTER">
+                              <Button fx:id="addUser_btn" alignment="CENTER" contentDisplay="CENTER" disable="true" layoutX="10.0" layoutY="260.0" mnemonicParsing="false" onAction="#switchForm" prefHeight="35.0" prefWidth="180.0" stylesheets="@dashboardDesign.css" text="Số dư" textAlignment="CENTER">
+                                 <styleClass>
+                                    <String fx:value="nav-btn" />
+                                    <String fx:value="shadow" />
+                                 </styleClass>
+                              </Button>
+                              <Button fx:id="changePin_btn" alignment="CENTER" contentDisplay="CENTER" disable="true" layoutX="10.0" layoutY="305.0" mnemonicParsing="false" onAction="#switchForm" prefHeight="35.0" prefWidth="180.0" stylesheets="@dashboardDesign.css" text="Mã PIN" textAlignment="CENTER">
                                  <styleClass>
                                     <String fx:value="nav-btn" />
                                     <String fx:value="shadow" />
@@ -78,7 +91,7 @@
                <center>
                   <AnchorPane prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
                      <children>
-                        <AnchorPane fx:id="home_form" layoutX="5.0" prefHeight="555.0" prefWidth="900.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="0.0">
+                        <AnchorPane fx:id="home_form" layoutX="5.0" prefHeight="555.0" prefWidth="900.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="-5.0" AnchorPane.topAnchor="0.0">
                            <children>
                               <AnchorPane layoutX="8.0" layoutY="6.0" prefHeight="559.0" prefWidth="895.0" stylesheets="@dashboardDesign.css" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="1.0">
                                  <styleClass>
@@ -369,6 +382,52 @@
                                           <ImageView fx:id="choose_image_view1" />
                                        </children>
                                     </AnchorPane>
+                                 </children>
+                              </AnchorPane>
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane fx:id="historyPage" layoutX="1.0" layoutY="-1.0" prefHeight="555.0" prefWidth="900.0">
+                           <children>
+                              <AnchorPane layoutX="8.0" layoutY="3.0" prefHeight="559.0" prefWidth="895.0" stylesheets="@dashboardDesign.css" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="8.0" AnchorPane.rightAnchor="7.0" AnchorPane.topAnchor="3.0">
+                                 <styleClass>
+                                    <String fx:value="white-bg" />
+                                    <String fx:value="shadow" />
+                                 </styleClass>
+                                 <children>
+                                    <TableView fx:id="historyTable" layoutX="14.0" layoutY="143.0" prefHeight="388.0" prefWidth="862.0">
+                                      <columns>
+                                          <TableColumn fx:id="timeIn" prefWidth="75.0" text="Thời gian vào" />
+                                          <TableColumn fx:id="timeOut" prefWidth="75.0" text="Thời gian ra" />
+                                      </columns>
+                                       <columnResizePolicy>
+                                          <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                       </columnResizePolicy>
+                                    </TableView>
+                                 </children>
+                              </AnchorPane>
+                              <AnchorPane layoutX="23.0" layoutY="24.0" prefHeight="102.0" prefWidth="860.0" stylesheets="@dashboardDesign.css">
+                                 <styleClass>
+                                    <String fx:value="white-bg" />
+                                    <String fx:value="shadow" />
+                                 </styleClass>
+                                 <children>
+                                    <Label alignment="CENTER_RIGHT" layoutX="120.0" layoutY="31.0">
+                                       <font>
+                                          <Font name="Arial Bold" size="24.0" />
+                                       </font>
+                                    </Label>
+                                    <Button fx:id="incomingCarBtn" layoutX="32.0" layoutY="31.0" mnemonicParsing="false" onAction="#handleIncomingCar" prefHeight="40.0" prefWidth="100.0" styleClass="add-btn" stylesheets="@dashboardDesign.css" text="Xe vào" />
+                                    <Button fx:id="outgoingCarBtn" disable="true" layoutX="144.0" layoutY="31.0" mnemonicParsing="false" onAction="#handleOutgoingCar" prefHeight="40.0" prefWidth="100.0" styleClass="update-btn" stylesheets="@dashboardDesign.css" text="Xe ra" />
+                                    <Label fx:id="pinErrorText" alignment="CENTER_RIGHT" layoutX="32.0" layoutY="72.0" textFill="#f53535">
+                                       <font>
+                                          <Font name="Arial Bold" size="14.0" />
+                                       </font>
+                                    </Label>
+                                    <Label fx:id="statusLabel" alignment="CENTER_RIGHT" layoutX="266.0" layoutY="43.0" textFill="#998aff">
+                                       <font>
+                                          <Font name="Arial Bold" size="18.0" />
+                                       </font>
+                                    </Label>
                                  </children>
                               </AnchorPane>
                            </children>

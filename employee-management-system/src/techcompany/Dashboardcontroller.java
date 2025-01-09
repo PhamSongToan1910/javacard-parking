@@ -5,12 +5,16 @@
  */
 package techcompany;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -19,6 +23,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import techcompany.UIcomponent.EditCardInfoModal.EditCardInfoController;
 import techcompany.entities.Car;
+import techcompany.entities.History;
 import techcompany.entities.Response;
 import techcompany.service.CarService;
 import techcompany.service.BalanceService;
@@ -28,6 +33,7 @@ import techcompany.entities.CardInfo;
 import java.io.File;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -103,6 +109,12 @@ public class Dashboardcontroller implements Initializable {
     private AnchorPane addEmployee_form;
 
     @FXML
+    private Button historyPage_btn;
+
+    @FXML
+    private AnchorPane historyPage;
+
+    @FXML
     private Button addUser_btn;
 
     @FXML
@@ -157,6 +169,25 @@ public class Dashboardcontroller implements Initializable {
     Label balanceLabel;
 
     // End khai báo button của phần kết nói
+
+    // Start khai báo history
+    @FXML
+    private Button incomingCarBtn;
+
+    @FXML
+    private Button outgoingCarBtn;
+
+    @FXML
+    private TableView<History> historyTable;
+
+    @FXML
+    private TableColumn<History, String> timeIn;
+
+    @FXML
+    private TableColumn<History, String> timeOut;
+
+    //
+
     private int incorrectPinAttempts = 0;
     private int MAX_INCORRECT_ATTEMPTS = 5;
     private Connection connect;
@@ -191,23 +222,36 @@ public class Dashboardcontroller implements Initializable {
 
             home_form.setVisible(true);
             addEmployee_form.setVisible(false);
+            historyPage.setVisible(false);
             addUser_form.setVisible(false);
             depDesig_form.setVisible(false);
 
         } else if (event.getSource() == addEmployee_btn) {
             home_form.setVisible(false);
             addEmployee_form.setVisible(true);
+            historyPage.setVisible(false);
             addUser_form.setVisible(false);
             depDesig_form.setVisible(false);
-        } else if (event.getSource() == addUser_btn) {
+        }
+        else if(event.getSource() == historyPage_btn) {
             home_form.setVisible(false);
             addEmployee_form.setVisible(false);
+            historyPage.setVisible(true);
+            addUser_form.setVisible(false);
+            depDesig_form.setVisible(false);
+            initializeTableData();
+        }
+        else if (event.getSource() == addUser_btn) {
+            home_form.setVisible(false);
+            addEmployee_form.setVisible(false);
+            historyPage.setVisible(false);
             addUser_form.setVisible(true);
             depDesig_form.setVisible(false);
             getSoDu();
         } else if (event.getSource() == changePin_btn) {
             home_form.setVisible(false);
             addEmployee_form.setVisible(false);
+            historyPage.setVisible(false);
             addUser_form.setVisible(false);
             depDesig_form.setVisible(true);
 
@@ -520,6 +564,38 @@ public class Dashboardcontroller implements Initializable {
             amountInput.setText("");
         }
         label_show_noti_form_balance.setText("Vui lòng nhập bội của 10.000");
+    }
+
+    //Hanlde history page
+    @FXML
+    private void handleIncomingCar(ActionEvent event) {
+        //Để truyền data vào xin hãy làm giốn initialData
+    }
+
+    @FXML
+    private void handleOutgoingCar(ActionEvent event) {
+        //Để truyền data vào bảng xin hãy làm giốn initialData
+    }
+
+    ObservableList<History> initialData() {
+        ObservableList<History> historyList = FXCollections.observableArrayList();
+        // Create History objects with all 4 fields
+        History history1 = new History(1, "CAR001", "9:00 AM", "10:00 AM");
+        History history2 = new History(2, "CAR002", "11:00 AM", "12:00 PM");
+        historyList.addAll(history1, history2);
+        return historyList;
+    }
+
+    private void initializeTableData() {
+        // Set up the column cell factories - only for timeIn and timeOut
+        timeIn.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getTimeIn()));
+
+        timeOut.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getTimeOut()));
+
+        // Load the data
+        historyTable.setItems(initialData());
     }
 
     // Xử lý sự kiện nạp tiền
