@@ -202,6 +202,7 @@ public class Dashboardcontroller implements Initializable {
     private long timeInLong;
     private long timeOutLong;
     private Car car;
+    private boolean isBlocked;
 
     // Thêm các phần tử liên quan đến chức năng nạp/trừ tiền
     @FXML
@@ -310,6 +311,7 @@ public class Dashboardcontroller implements Initializable {
             byte lc = (byte) pinBytes.length;
             Response response = Utils.login(ins, lc, pinBytes);
             System.out.println("responseCode: " + response.errorCode);
+            System.out.println("publicKey: " + Utils.publicKey);
             if (response.errorCode == Constant.SUCCESS) {
                 String infor = response.getdata();
                 String[] parts = infor.split("@");
@@ -345,6 +347,7 @@ public class Dashboardcontroller implements Initializable {
                     final int[] startTime = {5};
                     alert.setContentText("Bạn đã nhập quá số lần. Vui lòng đợi trong " + startTime[0] + " giây.");
                     startTime[0]--;
+                    setBlocked(true);
 
                     Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
                         if (startTime[0] > 0) {
@@ -357,6 +360,7 @@ public class Dashboardcontroller implements Initializable {
                     }));
                     timeline.setCycleCount(startTime[0] + 1);
                     timeline.setOnFinished(e -> {
+                        setBlocked(false);
                         incorrectPinAttempts = 0;
                         editCardInfo.setDisable(false);
                     });
@@ -530,7 +534,7 @@ public class Dashboardcontroller implements Initializable {
 
 
             String publicKey = response.getdata();
-            BigDecimal balance = new BigDecimal("1000000.00");
+            BigDecimal balance = new BigDecimal("0");
             car.setBalance(balance);
             car.setPin(pinCode);
             car.setPublicKey(publicKey);
@@ -619,6 +623,7 @@ public class Dashboardcontroller implements Initializable {
 
             Response response = Utils.saveAndGetMonney((byte) 0x05, (byte) 0x00, bytes);
             if (response.errorCode == Constant.SUCCESS) {
+                CarService.updateBalance(connect, car);
                 incomingCarBtn.setDisable(false);
                 outgoingCarBtn.setDisable(true);
             } else {
@@ -671,7 +676,7 @@ public class Dashboardcontroller implements Initializable {
 
             if (response.errorCode == Constant.SUCCESS) {
                 String result = response.getdata();
-
+                CarService.updateBalance(connect, car);
                 balanceLabel.setText("Số dư: " + (Integer.parseInt(result) * 10000) + " đ");
                 amountInput.setText("");
             } else {
@@ -695,7 +700,7 @@ public class Dashboardcontroller implements Initializable {
 
             if (response.errorCode == Constant.SUCCESS) {
                 String result = response.getdata();
-
+                CarService.updateBalance(connect, car);
                 balanceLabel.setText("Số dư: " + (Integer.parseInt(result) * 10000) + " đ");
                 amountInput.setText("");
                 label_show_noti_form_balance.setText(message);
@@ -745,4 +750,11 @@ public class Dashboardcontroller implements Initializable {
 
     }
 
+    public boolean isBlocked() {
+        return isBlocked;
+    }
+
+    public void setBlocked(boolean blocked) {
+        isBlocked = blocked;
+    }
 }

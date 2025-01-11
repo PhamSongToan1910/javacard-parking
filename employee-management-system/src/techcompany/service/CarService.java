@@ -2,6 +2,7 @@ package techcompany.service;
 
 import techcompany.database;
 import techcompany.entities.Car;
+import techcompany.entities.History;
 import techcompany.entities.Response;
 
 import java.sql.*;
@@ -28,6 +29,19 @@ public class CarService {
             pre.close();
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static void updateBalance(Connection connect, Car car) {
+        try {
+            String sql = "UPDATE history SET balance = ? WHERE id_card = ?";
+            PreparedStatement pre = connect.prepareStatement(sql);
+            pre.setBigDecimal(1, car.getBalance());
+            pre.setString(1, car.getIdCard());
+            pre.executeUpdate();
+            pre.close();
+        } catch (Exception e) {
+            System.out.println(e);
         }
     }
 }
