@@ -34,7 +34,7 @@ public class CarService {
 
     public static void updateBalance(Connection connect, Car car) {
         try {
-            String sql = "UPDATE history SET balance = ? WHERE id_card = ?";
+            String sql = "UPDATE car SET balance = ? WHERE id_card = ?";
             PreparedStatement pre = connect.prepareStatement(sql);
             pre.setBigDecimal(1, car.getBalance());
             pre.setString(2, car.getIdCard());
