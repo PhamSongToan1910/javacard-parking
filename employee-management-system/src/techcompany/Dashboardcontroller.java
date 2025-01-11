@@ -5,6 +5,8 @@
  */
 package techcompany;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -21,6 +23,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import techcompany.UIcomponent.EditCardInfoModal.EditCardInfoController;
 import techcompany.entities.Car;
 import techcompany.entities.History;
@@ -98,6 +101,9 @@ public class Dashboardcontroller implements Initializable {
     public Button editCardInfo;
 
     @FXML
+    public ImageView choose_image_view1;
+
+    @FXML
     private AnchorPane main_form;
 
     @FXML
@@ -165,9 +171,6 @@ public class Dashboardcontroller implements Initializable {
 
     @FXML
     private Button updateImageBtn;
-
-    @FXML
-    ImageView imgPreview;
 
     @FXML
     Label balanceLabel;
@@ -299,12 +302,14 @@ public class Dashboardcontroller implements Initializable {
     @FXML
     private void handleConnectCard() throws Exception {
         String pin = pinInput.getText();
+        System.out.println("pin: " + pin);
         if (isValidPin(pin)) {
             byte[] pinBytes = Utils.encryptData(pin,Utils.publicKey);
             System.out.println("mã hóa: " + pinBytes.toString());
             byte ins = (byte) 02;
             byte lc = (byte) pinBytes.length;
             Response response = Utils.login(ins, lc, pinBytes);
+            System.out.println("responseCode: " + response.errorCode);
             if (response.errorCode == Constant.SUCCESS) {
                 String infor = response.getdata();
                 String[] parts = infor.split("@");
@@ -314,6 +319,9 @@ public class Dashboardcontroller implements Initializable {
                 carModelLabel.setText(parts[2]);
                 carColorLabel.setText(parts[3]);
                 ownerNameLabel.setText(parts[4]);
+                choose_image_view1.setImage(Utils.convertByteToImage(imageByte));
+                choose_image_view1.setFitWidth(120);
+                choose_image_view1.setFitHeight(120);
 
                 incorrectPinAttempts = 0;
                 statusLabel.setText("Đã kết nối thẻ");
@@ -329,9 +337,32 @@ public class Dashboardcontroller implements Initializable {
                 if (incorrectPinAttempts >= MAX_INCORRECT_ATTEMPTS) {
                     editCardInfo.setDisable(true);
                     pinErrorText.setVisible(true);
-                    pinErrorText.setText("Bạn đã nhập quá số lần cho phép.");
 
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Lỗi");
+                    alert.setHeaderText(null);
 
+                    final int[] startTime = {5};
+                    alert.setContentText("Bạn đã nhập quá số lần. Vui lòng đợi trong " + startTime[0] + " giây.");
+                    startTime[0]--;
+
+                    Timeline timeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
+                        if (startTime[0] > 0) {
+                            alert.setContentText("Bạn đã nhập quá số lần. Vui lòng đợi trong " + startTime[0] + " giây.");
+                            startTime[0]--;
+                        } else {
+                            pinErrorText.setText("");
+                            alert.close();
+                        }
+                    }));
+                    timeline.setCycleCount(startTime[0] + 1);
+                    timeline.setOnFinished(e -> {
+                        incorrectPinAttempts = 0;
+                        editCardInfo.setDisable(false);
+                    });
+
+                    alert.show();
+                    timeline.play();
                 } else {
                     pinErrorText.setVisible(true);
                     editCardInfo.setDisable(true);
@@ -353,12 +384,12 @@ public class Dashboardcontroller implements Initializable {
     }
 
     private void resetConnectField() {
-        idLabel.setText("Text ID");
-        licensePlateLabel.setText("Tên chủ xe");
-        brandLabel.setText("Hãng xe");
-        carModelLabel.setText("Mẫu xe");
-        carColorLabel.setText("Màu xe");
-        ownerNameLabel.setText("Tên chủ xe");
+        idLabel.setText("");
+        licensePlateLabel.setText("");
+        brandLabel.setText("");
+        carModelLabel.setText("");
+        carColorLabel.setText("");
+        ownerNameLabel.setText("");
     }
 
     @FXML

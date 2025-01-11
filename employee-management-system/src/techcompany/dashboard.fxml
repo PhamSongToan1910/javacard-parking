@@ -369,7 +369,7 @@
                                           <Font name="Arial" size="18.0" />
                                        </font>
                                     </Label>
-                                    <ImageView fx:id="imgPreview" fitHeight="138.0" fitWidth="134.0" layoutX="320.0" layoutY="155.0" pickOnBounds="true" preserveRatio="true" />
+<!--                                    <ImageView fx:id="imgPreview" fitHeight="138.0" fitWidth="134.0" layoutX="320.0" layoutY="155.0" pickOnBounds="true" preserveRatio="true" />-->
                                     <Button fx:id="editCardInfo" disable="true" layoutX="596.0" layoutY="305.0" mnemonicParsing="false" onAction="#handleOpenModalEditCardInfo" prefHeight="41.0" prefWidth="127.0" styleClass="add-btn" stylesheets="@dashboardDesign.css" text="Sửa thông tin" />
                                     <AnchorPane layoutX="366.0" layoutY="24.0" prefHeight="114.0" prefWidth="123.0" />
                                     <Button fx:id="updateImageBtn" disable="true" layoutX="625.0" layoutY="24.0" mnemonicParsing="false" onAction="#chooseimage" prefHeight="36.0" prefWidth="99.0" styleClass="add-btn" stylesheets="@dashboardDesign.css" text="Thêm ảnh" />
@@ -379,7 +379,8 @@
                                           <String fx:value="shadow" />
                                        </styleClass>
                                        <children>
-                                          <ImageView fx:id="choose_image_view1" />
+                                          <ImageView fx:id="choose_image_view1">
+                                          </ImageView>
                                        </children>
                                     </AnchorPane>
                                  </children>
@@ -418,16 +419,6 @@
                                     </Label>
                                     <Button fx:id="incomingCarBtn" layoutX="32.0" layoutY="31.0" mnemonicParsing="false" onAction="#handleIncomingCar" prefHeight="40.0" prefWidth="100.0" styleClass="add-btn" stylesheets="@dashboardDesign.css" text="Xe vào" />
                                     <Button fx:id="outgoingCarBtn" disable="true" layoutX="144.0" layoutY="31.0" mnemonicParsing="false" onAction="#handleOutgoingCar" prefHeight="40.0" prefWidth="100.0" styleClass="update-btn" stylesheets="@dashboardDesign.css" text="Xe ra" />
-                                    <Label fx:id="pinErrorText" alignment="CENTER_RIGHT" layoutX="32.0" layoutY="72.0" textFill="#f53535">
-                                       <font>
-                                          <Font name="Arial Bold" size="14.0" />
-                                       </font>
-                                    </Label>
-                                    <Label fx:id="statusLabel" alignment="CENTER_RIGHT" layoutX="266.0" layoutY="43.0" textFill="#998aff">
-                                       <font>
-                                          <Font name="Arial Bold" size="18.0" />
-                                       </font>
-                                    </Label>
                                  </children>
                               </AnchorPane>
                            </children>
