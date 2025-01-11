@@ -329,6 +329,34 @@ public class Utils {
         }
     }
 
+    public static Response sendImageInChunks(byte[] imageBytes) {
+        int chunkSize = 256;
+        int totalChunks = (int) Math.ceil(imageBytes.length / (double) chunkSize);
+
+        byte ins = (byte) 0x07;
+        byte lc;
+
+        for (int i = 0; i < totalChunks; i++) {
+            int start = i * chunkSize;
+            int end = Math.min((i + 1) * chunkSize, imageBytes.length);
+
+            byte[] chunkData = Arrays.copyOfRange(imageBytes, start, end);
+            lc = (byte) chunkData.length;
+
+            byte[] data = new byte[chunkData.length/2 + 2];
+            data[0] = (byte) i;
+            data[1] = (byte) totalChunks;
+            System.arraycopy(chunkData, 0, data, 2, chunkData.length/2);
+
+            Response response = Utils.saveAndGetData(ins, lc, data);
+            if (response.errorCode != Constant.SUCCESS) {
+                return new Response(Constant.UNKNOWN_ERROR, "Error sending chunk " + i);
+            }
+        }
+
+        return new Response(Constant.SUCCESS, "Image sent in chunks successfully.");
+    }
+
     private static String bytesToHex(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {

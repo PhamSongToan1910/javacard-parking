@@ -525,12 +525,6 @@ public class Dashboardcontroller implements Initializable {
         if (selectedFile != null) {
             try {
                 imageByte = Utils.getBytesFromFile(selectedFile);
-                System.out.println("ảnh: ");
-                for (byte b : imageByte) {
-                    System.out.printf("%02X ", b); // In mỗi byte dưới dạng 2 ký tự hex, ví dụ: FF
-                }
-                System.out.println();
-
                 Image image = new Image(selectedFile.toURI().toString());
                 choose_image_view.setImage(image);
                 choose_image_view.setFitWidth(120);
@@ -539,7 +533,7 @@ public class Dashboardcontroller implements Initializable {
                 choose_image_view.setSmooth(true);
                 byte ins = (byte) 07;
                 byte lc = (byte) imageByte.length;
-                Response response = Utils.saveAndGetData(ins, lc, imageByte);
+                Response response = Utils.sendImageInChunks(imageByte);
                 if (response.errorCode == Constant.SUCCESS) {
                     System.out.println("Image chosen");
                 }
